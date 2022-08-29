@@ -8,9 +8,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div></div>
+        <a href="./htmls/contorolPoints.html">contorolPoints</a>
+    </div>
+    <canvas id="myCanvas"></canvas>
 
-
+    <!-- CDNからthreejsを引っ張ってくる -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="./main.js"></script>
+    <!-- カメラ制御ライブラリ -->
+    <script src="https://unpkg.com/three@0.137.4/examples/js/controls/OrbitControls.js"></script>
+    <!-- TransformControls -->
+    <script src="https://unpkg.com/three@0.137.4/examples/js/controls/TransformControls.js"></script>
+    <!-- Colladaファイルのインポート用ライブラリ -->
+    <script src="https://unpkg.com/three@0.137.4/examples/js/loaders/ColladaLoader.js"></script>
+    <!-- CDNからGUIライブラリを引っ張ってくる -->
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.17.0/dist/lil-gui.umd.min.js"></script>
+    <script src="./bufferGeometryStudy1.js"></script>
 </body>
 </html>
