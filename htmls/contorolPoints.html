@@ -66,11 +66,13 @@
 
 		const splines = {};
 
+		//右上のGUIのパラメータ
 		const params = {
 			uniform: true,
 			tension: 0.5,
 			centripetal: true,
 			chordal: true,
+			gridPosition: -199,
 			addPoint: addPoint,
 			removePoint: removePoint,
 			exportSpline: exportSpline
@@ -83,14 +85,16 @@
 			container = document.getElementById('container');
 
 			scene = new THREE.Scene();
+			scene.autoUpdate = true;
 			scene.background = new THREE.Color(0xf0f0f0);
 
 			camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
-			camera.position.set(0, 250, 1000);
+			camera.position.set(0, 500, 1000);
 			scene.add(camera);
 
+			//環境光の設定
 			scene.add(new THREE.AmbientLight(0xf0f0f0));
-			const light = new THREE.SpotLight(0xffffff, 1.5);
+			const light = new THREE.SpotLight(0xffffff);
 			light.position.set(0, 1500, 200);
 			light.angle = Math.PI * 0.2;
 			light.castShadow = true;
@@ -99,32 +103,39 @@
 			light.shadow.bias = - 0.000222;
 			light.shadow.mapSize.width = 1024;
 			light.shadow.mapSize.height = 1024;
+			light.intensty = 200;
 			scene.add(light);
 
+			//地面の設定
 			const planeGeometry = new THREE.PlaneGeometry(2000, 2000);
 			planeGeometry.rotateX(- Math.PI / 2);
 			const planeMaterial = new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.2 });
-
 			const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 			plane.position.y = - 200;
 			plane.receiveShadow = true;
 			scene.add(plane);
 
+			//x-y平面のグリットの設定
 			const helper = new THREE.GridHelper(2000, 100);
 			helper.position.y = - 199;
 			helper.material.opacity = 0.25;
 			helper.material.transparent = true;
 			scene.add(helper);
 
+			//レンダラーの設定
 			renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setPixelRatio(window.devicePixelRatio);
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.shadowMap.enabled = true;
 			container.appendChild(renderer.domElement);
 
+			//GUIの設定
 			const gui = new GUI();
-
+			//paramsで宣言したuniform要素をGUIに追加
+			//onChange(event) => 値が変更されるたびにonChange内のeventが呼び出される。
 			gui.add(params, 'uniform').onChange(render);
+			//gui.add（object , property , min , max ,`step`）
+			//第五引数のstepはstep()で設定でき、可読性も高いので、step()で設定しています。
 			gui.add(params, 'tension', 0, 1).step(0.01).onChange(function (value) {
 
 				splines.uniform.tension = value;
@@ -134,6 +145,13 @@
 			});
 			gui.add(params, 'centripetal').onChange(render);
 			gui.add(params, 'chordal').onChange(render);
+			//ここ自作（グリッドのy軸成分を変更する）
+			gui.add(params, 'gridPosition',-200,200).step(10).onChange(function (value) {
+
+				helper.position.y = value;
+				render();
+
+			});
 			gui.add(params, 'addPoint');
 			gui.add(params, 'removePoint');
 			gui.add(params, 'exportSpline');
