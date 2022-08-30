@@ -54,6 +54,7 @@
 		const positions = [];
 		const point = new THREE.Vector3();
 
+		//raycaster => マウスがどのオブジェクトを指しているか調べるもの
 		const raycaster = new THREE.Raycaster();
 		const pointer = new THREE.Vector2();
 		const onUpPosition = new THREE.Vector2();
@@ -62,6 +63,7 @@
 		const geometry = new THREE.BoxGeometry(20, 20, 20);
 		let transformControl;
 
+		//カーブの総頂点数
 		const ARC_SEGMENTS = 200;
 
 		const splines = {};
@@ -127,6 +129,7 @@
 			renderer.setPixelRatio(window.devicePixelRatio);
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.shadowMap.enabled = true;
+			//div id=containerの中にcanvasを作成
 			container.appendChild(renderer.domElement);
 
 			//GUIの設定
@@ -157,15 +160,19 @@
 			gui.add(params, 'exportSpline');
 			gui.open();
 
+
 			// Controls
 			const controls = new OrbitControls(camera, renderer.domElement);
-			controls.damping = 0.2;
+			controls.enableDamping = true;
+			controls.dampingFactor = 0.5;
+			//カメラの位置情報が更新されるたびにrender()を呼び出す
 			controls.addEventListener('change', render);
 
 			transformControl = new TransformControls(camera, renderer.domElement);
 			transformControl.addEventListener('change', render);
+			//マウスのドラッグで変更されたときに呼び出す
 			transformControl.addEventListener('dragging-changed', function (event) {
-
+				//オブジェクトのトランスフォーム中は、カメラの視点を切り替えられないようにする
 				controls.enabled = !event.value;
 
 			});
@@ -177,9 +184,13 @@
 
 			});
 
+			//まだよくわからないが、
+			//おそらくカメラ視点の座標系の制御を行うためのイベント呼び出しだと思う。
 			document.addEventListener('pointerdown', onPointerDown);
 			document.addEventListener('pointerup', onPointerUp);
 			document.addEventListener('pointermove', onPointerMove);
+
+			//windowサイズの変更に対応
 			window.addEventListener('resize', onWindowResize);
 
 			/*******
@@ -237,6 +248,7 @@
 
 			}
 
+			//ページ読み込み時に追加される4つの立方体の初期値
 			load([new THREE.Vector3(289.76843686945404, 452.51481137238443, 56.10018915737797),
 			new THREE.Vector3(- 53.56300074753207, 171.49711742836848, - 14.495472686253045),
 			new THREE.Vector3(- 91.40118730204415, 176.4306956436485, - 6.958271935582161),
@@ -246,6 +258,7 @@
 
 		}
 
+		//立方体をランダムな座標に追加する
 		function addSplineObject(position) {
 
 			const material = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
@@ -271,12 +284,16 @@
 
 		}
 
+		//新しいカーブの基準点を追加する関数
 		function addPoint() {
 
+			//カーブの基準点の数をカウントする
 			splinePointsLength++;
 
+			//ランダムな座標をpositionsにpushする
 			positions.push(addSplineObject().position);
 
+			//カーブを更新する
 			updateSplineOutline();
 
 			render();
@@ -304,8 +321,12 @@
 
 		}
 
+		
+		//カーブを描く（更新もする）
 		function updateSplineOutline() {
 
+			//splinesの要素数だけ繰り返す
+			//splinesは、多分curveの要素
 			for (const k in splines) {
 
 				const spline = splines[k];
@@ -313,10 +334,15 @@
 				const splineMesh = spline.mesh;
 				const position = splineMesh.geometry.attributes.position;
 
+				//ARC_SEGMENTSの数だけカーブの座標計算をする
 				for (let i = 0; i < ARC_SEGMENTS; i++) {
 
+					//t => i番目の点 / (総点数-1)
+					//tはcurveのポジション[0,1]を示す
 					const t = i / (ARC_SEGMENTS - 1);
+					//i番目の点の座標を計算して、pointに代入
 					spline.getPoint(t, point);
+					//i番目の点の座標をセットする
 					position.setXYZ(i, point.x, point.y, point.z);
 
 				}
@@ -389,15 +415,20 @@
 			onUpPosition.x = event.clientX;
 			onUpPosition.y = event.clientY;
 
+			//マウスをクリックした点と離した点が同じ座標なら、3Dオブジェクトをコントロールから削除、UIを非表示にする
 			if (onDownPosition.distanceTo(onUpPosition) === 0) transformControl.detach();
 
 		}
 
 		function onPointerMove(event) {
 
+			//pointer = (ウィンドウ上のマウスの位置/ウィンドウの幅or高さ) * 2 - 1
+			//-1~+1に正規化している
 			pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
 			pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
+			//第一引数には-1~+1に正規化した2DVectorしか入れられない
+			//update the picking ray with the camera and pointer position
 			raycaster.setFromCamera(pointer, camera);
 
 			const intersects = raycaster.intersectObjects(splineHelperObjects, false);
@@ -423,6 +454,7 @@
 
 			renderer.setSize(window.innerWidth, window.innerHeight);
 
+			controls.update();
 			render();
 
 		}
