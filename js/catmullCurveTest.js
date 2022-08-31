@@ -5,7 +5,7 @@ import { TransformControls } from '../node_modules/three/examples/jsm/controls/T
 //import * as Curves from '../node_modules/three/examples/jsm/curves/CurveExtras.js';
 
 /*----------変数などの宣言----------*/
-const curveSegments = 100;
+const curveSegments = 20;
 
 let tubeGeometry,mesh;
 
@@ -14,7 +14,7 @@ const params = {
     scale: 4,
     extrusionSegments: curveSegments,
     radiusSegments: 2,
-    closed: true,
+    closed: false,
 };
 
     //Create a closed wavey loop
@@ -138,16 +138,20 @@ function init() {
 
 	gui.add(params, 'scale',2,10).step(1).onChange( function () {
         setScale();
+        render();
     });
 
-    gui.add(params, 'extrusionSegments',50,500).step(50).onChange( function () {
+    gui.add(params, 'extrusionSegments',5,50).step(5).onChange( function () {
         addTube();
+        render();
     });
     gui.add(params, 'radiusSegments',2,12).step(1).onChange( function () {
         addTube();
+        render();
     });
     gui.add(params, 'closed').onChange( function () {
         addTube();
+        render();
     });
     gui.open();
 
