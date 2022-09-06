@@ -7,7 +7,7 @@ import { TransformControls } from '../node_modules/three/examples/jsm/controls/T
 /*----------変数などの宣言----------*/
 const curveSegments = 20;
 
-let tubeGeometry,mesh;
+let tubeGeometry, mesh;
 
 
 const params = {
@@ -15,35 +15,36 @@ const params = {
     extrusionSegments: curveSegments,
     radiusSegments: 2,
     closed: false,
+    movement: -5,
 };
 
-    //Create a closed wavey loop
-    const curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-10, -5, 0),
-        new THREE.Vector3(-5, 0, 0),
-        new THREE.Vector3(-2,0,0),
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(5, 0, 0),
-        new THREE.Vector3(10, 0, 0)
-    ]);
+//Create a closed wavey loop
+const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-10, -5, 0),
+    new THREE.Vector3(-5, 0, 0),
+    new THREE.Vector3(-2, 0, 0),
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(5, 0, 0),
+    new THREE.Vector3(10, 0, 0)
+]);
 
-    const material = new THREE.MeshLambertMaterial( { color: 0xff00ff } );
-    const wireframeMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.3, wireframe: true, transparent: true } );
+const material = new THREE.MeshLambertMaterial({ color: 0xff00ff });
+const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.3, wireframe: true, transparent: true });
 
 function addTube() {
 
-    if ( mesh !== undefined ) {
+    if (mesh !== undefined) {
 
-        parent.remove( mesh );
+        parent.remove(mesh);
         mesh.geometry.dispose();
 
     }
 
     const extrudePath = curve;
 
-    tubeGeometry = new THREE.TubeGeometry( extrudePath, params.extrusionSegments, 2, params.radiusSegments, params.closed );
+    tubeGeometry = new THREE.TubeGeometry(extrudePath, params.extrusionSegments, 2, params.radiusSegments, params.closed);
 
-    addGeometry( tubeGeometry );
+    addGeometry(tubeGeometry);
 
     setScale();
 
@@ -51,23 +52,25 @@ function addTube() {
 
 function setScale() {
 
-    mesh.scale.set( params.scale, params.scale, params.scale );
+    mesh.scale.set(params.scale, params.scale, params.scale);
 
 }
 
-function addGeometry( geometry ) {
+function addGeometry(geometry) {
 
     // 3D shape
 
-    mesh = new THREE.Mesh( geometry, material );
-    const wireframe = new THREE.Mesh( geometry, wireframeMaterial );
-    mesh.add( wireframe );
+    mesh = new THREE.Mesh(geometry, material);
+    const wireframe = new THREE.Mesh(geometry, wireframeMaterial);
+    mesh.add(wireframe);
 
-    parent.add( mesh );
+    parent.add(mesh);
 
 }
 
-
+function transformVertex(vertex) {
+    vertex.y = params.movement;
+}
 
 
 
@@ -119,6 +122,17 @@ function init() {
         controls.enabled = !event.value;
 
     });
+
+    transformControl.addEventListener('objectChange', function () {
+
+        updateSplineOutline();
+
+    });
+
+    document.addEventListener('pointerdown', onPointerDown);
+	document.addEventListener('pointerup', onPointerUp);
+
+    transformControl.attach(mesh);
     scene.add(transformControl);
     window.addEventListener('resize', onWindowResize);
 
@@ -130,29 +144,34 @@ function init() {
     // tube
 
     parent = new THREE.Object3D();
-    scene.add( parent );
+    scene.add(parent);
 
     addTube();
 
-    const gui = new GUI( { width: 285 } );
+    const gui = new GUI({ width: 285 });
 
-	gui.add(params, 'scale',2,10).step(1).onChange( function () {
+    gui.add(params, 'scale', 2, 10).step(1).onChange(function () {
         setScale();
         render();
     });
 
-    gui.add(params, 'extrusionSegments',5,50).step(5).onChange( function () {
+    gui.add(params, 'extrusionSegments', 5, 50).step(5).onChange(function () {
         addTube();
         render();
     });
-    gui.add(params, 'radiusSegments',2,12).step(1).onChange( function () {
+    gui.add(params, 'radiusSegments', 2, 12).step(1).onChange(function () {
         addTube();
         render();
     });
-    gui.add(params, 'closed').onChange( function () {
+    gui.add(params, 'closed').onChange(function () {
         addTube();
         render();
     });
+    gui.add(params, 'movement',-10,0).step(1).onChange(function () {
+        transformVertex(mesh.geometry.vertices[0]);
+        addTube();
+        render();
+    })
     gui.open();
 
     // //カーブの頂点を取得する
@@ -176,6 +195,23 @@ function init() {
     function render() {
 
         renderer.render(scene, camera);
+
+    }
+
+    function onPointerDown(event) {
+
+        onDownPosition.x = event.clientX;
+        onDownPosition.y = event.clientY;
+
+    }
+
+    function onPointerUp() {
+
+        onUpPosition.x = event.clientX;
+        onUpPosition.y = event.clientY;
+
+        //マウスをクリックした点と離した点が同じ座標なら、3Dオブジェクトをコントロールから削除、UIを非表示にする
+        if (onDownPosition.distanceTo(onUpPosition) === 0) transformControl.detach();
 
     }
 
