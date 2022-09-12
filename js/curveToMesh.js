@@ -8,6 +8,7 @@ import { TransformControls } from '../node_modules/three/examples/jsm/controls/T
 let container;
 let camera, scene, renderer;
 let curve;
+let controls;
 const splineHelperObjects = [];
 let splinePointsLength = 4;
 const positions = [];
@@ -130,7 +131,7 @@ function init() {
 
 
     // Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.5;
     //カメラの位置情報が更新されるたびにrender()を呼び出す
