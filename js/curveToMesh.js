@@ -23,6 +23,13 @@ const firstPosition = [
     new THREE.Vector3(-200, 400, 0),
     new THREE.Vector3(-400, SemiPotentialHeight, 0)];
 
+const gapPosition = [
+    new THREE.Vector3(0,0,0),
+    new THREE.Vector3(0,100,0),
+    new THREE.Vector3(100,100,0),
+    new THREE.Vector3(100,0,0)
+];
+
 //raycaster => マウスがどのオブジェクトを指しているか調べるもの
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
