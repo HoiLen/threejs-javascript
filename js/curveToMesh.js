@@ -5,6 +5,9 @@ import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
 
+let metalPotentialHeight = 300;
+let SemiPotentialHeight = 200;
+
 let container;
 let camera, scene, renderer;
 let curve;
@@ -13,12 +16,12 @@ const splineHelperObjects = [];
 let splinePointsLength = 4;
 const positions = [];
 const point = new THREE.Vector3();
-let tubeGeometry, planeMesh;
+let tubeGeometry, planeMesh, metalPlaneMesh, oxideBox;
 const firstPosition = [
-    new THREE.Vector3(300, 400, 50),
-    new THREE.Vector3(100, 400, 50),
-    new THREE.Vector3(-200, 400, 50),
-    new THREE.Vector3(-400, 100, 50)];
+    new THREE.Vector3(300, 400, 0),
+    new THREE.Vector3(100, 400, 0),
+    new THREE.Vector3(-200, 400, 0),
+    new THREE.Vector3(-400, SemiPotentialHeight, 0)];
 
 //raycaster => マウスがどのオブジェクトを指しているか調べるもの
 const raycaster = new THREE.Raycaster();
@@ -26,7 +29,9 @@ const pointer = new THREE.Vector2();
 const onUpPosition = new THREE.Vector2();
 const onDownPosition = new THREE.Vector2();
 
+
 const geometry = new THREE.BoxGeometry(20, 20, 20);
+const oxideBoxGeometry = new THREE.BoxGeometry(100,500,200);
 let transformControl;
 
 //カーブの総頂点数
@@ -41,12 +46,14 @@ const params = {
     centripetal: true,
     chordal: true,
     gridPosition: -199,
+    Voltage: 0,
     addPoint: addPoint,
     removePoint: removePoint,
     exportSpline: exportSpline
 };
 
-const material2 = new THREE.MeshLambertMaterial({ color: 0xff00ff });
+const material2 = new THREE.MeshLambertMaterial({ color: 0xd79748 });
+const oxideMaterial = new THREE.MeshLambertMaterial({color: 0x185f77});
 const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.3, wireframe: true, transparent: true });
 
 init();
@@ -57,7 +64,7 @@ function init() {
 
     scene = new THREE.Scene();
     scene.autoUpdate = true;
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = new THREE.Color(0x20323f);
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
     camera.position.set(0, 500, 1000);
@@ -117,13 +124,22 @@ function init() {
     });
     gui.add(params, 'centripetal').onChange(render);
     gui.add(params, 'chordal').onChange(render);
-    //ここ自作（グリッドのy軸成分を変更する）
+    //（グリッドのy軸成分を変更する）
     gui.add(params, 'gridPosition', -200, 200).step(10).onChange(function (value) {
 
         helper.position.y = value;
         render();
 
     });
+    //電圧印加の影響を記述
+    gui.add(params,'Voltage', 0 , 200).step(10).onChange(function (value) {
+        //カーブの座標
+        positions[3].y = SemiPotentialHeight - value;
+        //金属のエネルギーバンドの座標
+        metalPlaneMesh.position.y = metalPotentialHeight - value;
+        render();
+        updateSplineOutline();
+    })
     gui.add(params, 'addPoint');
     gui.add(params, 'removePoint');
     gui.add(params, 'exportSpline');
@@ -230,6 +246,19 @@ function init() {
     load(firstPosition);
 
     addTube();
+
+    //金属のエネルギーバンド作成
+    metalPlaneMesh = new THREE.Mesh( new THREE.PlaneGeometry(300,200),new THREE.MeshLambertMaterial({color: 0xe5eced, side: THREE.DoubleSide}));
+    metalPlaneMesh.position.x = -650;
+    metalPlaneMesh.position.y = metalPotentialHeight;
+    metalPlaneMesh.rotation.x = Math.PI / 2;
+    scene.add(metalPlaneMesh);
+
+    //絶縁体を作成
+    oxideBox = new THREE.Mesh(oxideBoxGeometry,oxideMaterial);
+    oxideBox.position.x = -450;
+    oxideBox.position.y = 200;
+    scene.add(oxideBox);
 
     render();
 
