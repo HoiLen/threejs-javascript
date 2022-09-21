@@ -4,9 +4,13 @@ import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.
 
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
+import { DoubleSide } from 'three';
 
-let metalPotentialHeight = 300;
-let SemiPotentialHeight = 200;
+let metalPotentialHeight = 350;
+let SemiPotentialHeight = 380;
+let iWidth = 50;
+let iHeight = 400;
+let iDepth = 100;
 
 let container;
 let camera, scene, renderer;
@@ -16,7 +20,7 @@ const splineHelperObjects = [];
 let splinePointsLength = 4;
 const positions = [];
 const point = new THREE.Vector3();
-let tubeGeometry, planeMesh, metalPlaneMesh, oxideBox;
+let tubeGeometry, planeMesh, metalPlaneMesh, oxideBox, iGeometry, iMesh;
 const firstPosition = [
     new THREE.Vector3(300, 400, 0),
     new THREE.Vector3(100, 400, 0),
@@ -30,6 +34,7 @@ const gapPosition = [
     new THREE.Vector3(100,0,0)
 ];
 
+
 //raycaster => マウスがどのオブジェクトを指しているか調べるもの
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -38,7 +43,7 @@ const onDownPosition = new THREE.Vector2();
 
 
 const geometry = new THREE.BoxGeometry(20, 20, 20);
-const oxideBoxGeometry = new THREE.BoxGeometry(100,500,200);
+// const oxideBoxGeometry = new THREE.BoxGeometry(100,600,200);
 let transformControl;
 
 //カーブの総頂点数
@@ -54,18 +59,48 @@ const params = {
     chordal: true,
     gridPosition: -199,
     Voltage: 0,
-    addPoint: addPoint,
-    removePoint: removePoint,
-    exportSpline: exportSpline
+    // addPoint: addPoint,
+    // removePoint: removePoint,
+    // exportSpline: exportSpline
 };
 
 const material2 = new THREE.MeshLambertMaterial({ color: 0xd79748 });
-const oxideMaterial = new THREE.MeshLambertMaterial({color: 0x185f77});
-const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.3, wireframe: true, transparent: true });
+const iMaterial = new THREE.MeshBasicMaterial({ color: 0xb2baba, side: DoubleSide});
+const metalMaterial = new THREE.MeshLambertMaterial({color: 0x337766,side: DoubleSide});
+const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.0, wireframe: false, transparent: true });
+const iWireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x111111, opacity: 0.3, wireframe: true, transparent: true });
+
 
 init();
 
 function init() {
+
+    //絶縁体の頂点情報
+    let insulatorVertices = new Float32Array([
+        -iWidth,iHeight,-iDepth,
+        -iWidth,iHeight,iDepth,
+        iWidth,iHeight,iDepth,
+    
+        -iWidth,iHeight,-iDepth,
+        iWidth,iHeight,iDepth,
+        iWidth,iHeight,-iDepth,
+    
+        -iWidth,iHeight,-iDepth,
+        -iWidth,-iHeight,-iDepth,
+        -iWidth,iHeight,iDepth,
+    
+        -iWidth,iHeight,iDepth,
+        -iWidth,-iHeight,-iDepth,
+        -iWidth,-iHeight,iDepth,
+    
+        iWidth,iHeight,-iDepth,
+        iWidth,iHeight,iDepth,
+        iWidth,-iHeight,iDepth,
+    
+        iWidth,iHeight,-iDepth,
+        iWidth,-iHeight,iDepth,
+        iWidth,-iHeight,-iDepth,
+    ]);
 
     container = document.getElementById('container');
 
@@ -139,11 +174,22 @@ function init() {
 
     });
     //電圧印加の影響を記述
-    gui.add(params,'Voltage', 0 , 200).step(10).onChange(function (value) {
+    gui.add(params,'Voltage', -100 , 200).step(10).onChange(function (value) {
+
         //カーブの座標
-        positions[3].y = SemiPotentialHeight - value;
+        positions[3].y = SemiPotentialHeight - value * 0.7;
+
         //金属のエネルギーバンドの座標
-        metalPlaneMesh.position.y = metalPotentialHeight - value;
+        metalPlaneMesh.position.y = metalPotentialHeight - value * 1.4;
+
+        //絶縁体のエネルギーバンドの座標
+        insulatorVertices[1]=iHeight-value*0.5;
+        insulatorVertices[4]=iHeight-value*0.5;
+        insulatorVertices[10]=iHeight-value*0.5;
+        insulatorVertices[19]=iHeight-value*0.5;
+        insulatorVertices[25]=iHeight-value*0.5;
+        insulatorVertices[28]=iHeight-value*0.5;
+        iGeometry.setAttribute('position', new THREE.BufferAttribute(insulatorVertices,3));
         render();
         updateSplineOutline();
     })
@@ -254,18 +300,35 @@ function init() {
 
     addTube();
 
-    //金属のエネルギーバンド作成
-    metalPlaneMesh = new THREE.Mesh( new THREE.PlaneGeometry(300,200),new THREE.MeshLambertMaterial({color: 0xe5eced, side: THREE.DoubleSide}));
+
+    /*******
+     * 金属のエネルギーバンド作成
+     *********/
+    metalPlaneMesh = new THREE.Mesh( new THREE.PlaneGeometry(300,200),metalMaterial);
     metalPlaneMesh.position.x = -650;
     metalPlaneMesh.position.y = metalPotentialHeight;
     metalPlaneMesh.rotation.x = Math.PI / 2;
     scene.add(metalPlaneMesh);
 
-    //絶縁体を作成
-    oxideBox = new THREE.Mesh(oxideBoxGeometry,oxideMaterial);
-    oxideBox.position.x = -450;
-    oxideBox.position.y = 200;
-    scene.add(oxideBox);
+    
+    
+
+    /*******
+     * 絶縁体を作成
+     *********/
+    // oxideBox = new THREE.Mesh(oxideBoxGeometry,oxideMaterial);
+    // oxideBox.position.x = -450;
+    // oxideBox.position.y = 200;
+    // scene.add(oxideBox);
+
+    iGeometry = new THREE.BufferGeometry();
+    iGeometry.setAttribute('position', new THREE.BufferAttribute(insulatorVertices,3));
+    iMesh = new THREE.Mesh(iGeometry,iMaterial);
+    iMesh.position.x = -450;
+    iMesh.position.y = 200;
+    let iWireframe = new THREE.Mesh(iGeometry,iWireframeMaterial);
+    iMesh.add(iWireframe);
+    scene.add(iMesh);
 
     render();
 
