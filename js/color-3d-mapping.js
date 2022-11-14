@@ -6,7 +6,6 @@ import { TransformControls } from '../node_modules/three/examples/jsm/controls/T
 //htmlからcontainer要素を取り出す。
 const container = document.getElementById('container');
 
-
 /*--------------------3Dシーンの設定--------------------*/
 
 
@@ -61,10 +60,70 @@ helper.material.opacity = 0.25;
 helper.material.transparent = true;
 scene.add(helper);
 
+/*--------------------変数の宣言--------------------*/
+
+//各軸の頂点数
+const N = 200;
+
+//刻み幅
+const dt = Math.PI/8;
+
+//計算式の最大値
+const MAX = 400;
+
+
+//計算した頂点の格納
+const vertices = [];
+//平面グラフの縮尺調整
+const SCALE_XY = 1000;
+//縦軸グラフの縮尺調整
+const SCALE_Z = 1000;
+
+
+
+
 
 /*--------------------処理を書く--------------------*/
 
 init();
+
+//座標
+let pos = [];
+
+for (let i = 0; i < N; i++) {
+    pos[i] = [];
+
+    for (let j = 0; j < N; j++) {
+        //z = sin(x) + cos(y)
+        pos[i][j] = (i + j)/MAX;
+        //console.log(i,j,pos[i][j]);
+
+        const x = (i/N-0.5) * SCALE_XY;
+        const z = (j/N-0.5) * SCALE_XY;
+        const y = pos[i][j] * SCALE_Z;
+
+        vertices.push(x, y, z);
+    }
+}
+
+// 形状データを作成
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+// マテリアルを作成
+const material = new THREE.PointsMaterial({
+    // 一つ一つのサイズ
+    size: 10,
+    // 色
+    color: 0xffffff,
+});
+
+// 物体を作成
+const mesh = new THREE.Points(geometry, material);
+scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
+
+
+
 
 
 
