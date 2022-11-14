@@ -63,7 +63,7 @@ scene.add(helper);
 /*--------------------変数の宣言--------------------*/
 
 //各軸の頂点数
-const N = 200;
+const N = 100;
 
 //刻み幅
 const dt = Math.PI/8;
@@ -77,7 +77,7 @@ const vertices = [];
 //平面グラフの縮尺調整
 const SCALE_XY = 1000;
 //縦軸グラフの縮尺調整
-const SCALE_Z = 1000;
+const SCALE_Z = 50;
 
 
 
@@ -95,7 +95,7 @@ for (let i = 0; i < N; i++) {
 
     for (let j = 0; j < N; j++) {
         //z = sin(x) + cos(y)
-        pos[i][j] = (i + j)/MAX;
+        pos[i][j] = (j*Math.sin(Math.cos(i)))/MAX;
         //console.log(i,j,pos[i][j]);
 
         const x = (i/N-0.5) * SCALE_XY;
