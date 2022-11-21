@@ -62,11 +62,13 @@ scene.add(helper);
 
 /*--------------------変数の宣言--------------------*/
 
+let result = [];
+
 //各軸の頂点数
-const N = 100;
+const N = 6803;
 
 //刻み幅
-const dt = Math.PI/8;
+const dt = Math.PI / 8;
 
 //計算式の最大値
 const MAX = 400;
@@ -80,33 +82,89 @@ const SCALE_XY = 1000;
 const SCALE_Z = 50;
 
 
+/*--------------------関数--------------------*/
 
+function init() {
+    /*----------初期化処理----------*/
+    console.log("init");
+    console.log("out result");
+    //console.log(result);
+}
+
+function getCsv() {
+    console.log("getCSV");
+    let req = new XMLHttpRequest();
+    req.open("get", "../data/poten2d_0V-0V.csv", true);
+    req.send(null);
+
+    req.onload = function () {
+        console.log("onload");
+        convertCsvToArray(req.responseText, addPoints);
+
+    }
+
+
+}
+
+function convertCsvToArray(str, callback) {
+
+    setTimeout(function(){
+        console.log("convertCsvToArray");
+        let tmp = str.split("\n");
+
+        for (let i = 0; i < tmp.length; ++i) {
+            result[i] = tmp[i].split(',');
+        }
+
+        console.log(result);
+        callback();
+    }, 1000);
+
+}
+
+function addPoints() {
+    console.log("addPoints");
+    for (let i = 0; i < result.length; i++) {
+        const x = parseFloat(result[i][0])*100;
+        
+        const y = parseFloat(result[i][1])*100;
+        const z = parseFloat(result[i][2])*100;
+        if(i===6000){
+            console.log(z);
+        }
+        vertices.push(x, z, y);
+    }
+}
+
+//レンダリング時に実行したい処理をここに書く
+function render() {
+
+    renderer.render(scene, camera);
+
+}
+
+//ウィンドウのサイズにシーンを合わせる
+function onWindowResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    controls.update();
+    render();
+}
 
 
 /*--------------------処理を書く--------------------*/
 
 init();
+getCsv();
 
-//座標
-let pos = [];
-
-for (let i = 0; i < N; i++) {
-    pos[i] = [];
-
-    for (let j = 0; j < N; j++) {
-        //z = sin(x) + cos(y)
-        pos[i][j] = (Math.sin(i/8)+Math.cos(j/8));
-        //console.log(i,j,pos[i][j]);
-
-        const x = (i/N-0.5) * SCALE_XY;
-        const z = (j/N-0.5) * SCALE_XY;
-        const y = pos[i][j] * SCALE_Z;
-
-        vertices.push(x, y, z);
-    }
-}
 
 console.log(vertices);
+
+
 
 // 形状データを作成
 const geometry = new THREE.BufferGeometry();
@@ -131,28 +189,3 @@ scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
 
 render();
 
-/*--------------------関数--------------------*/
-
-function init() {
-    /*----------初期化処理----------*/
-    console.log("init");
-}
-
-//レンダリング時に実行したい処理をここに書く
-function render() {
-
-    renderer.render(scene, camera);
-
-}
-
-//ウィンドウのサイズにシーンを合わせる
-function onWindowResize() {
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    controls.update();
-    render();
-}
