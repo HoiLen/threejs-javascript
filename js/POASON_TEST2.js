@@ -87,7 +87,7 @@ const SCALE_Z = 50;
 function init() {
     /*----------初期化処理----------*/
     console.log("init");
-    console.log("out result");
+    //console.log("out result");
     //console.log(result);
 }
 
@@ -99,42 +99,34 @@ function getCsv() {
 
     req.onload = function () {
         console.log("onload");
-        convertCsvToArray(req.responseText, addPoints);
-
+        convertCsvToArray(req.responseText);
     }
-
 
 }
 
-function convertCsvToArray(str, callback) {
+function convertCsvToArray(str) {
 
-    setTimeout(function(){
-        console.log("convertCsvToArray");
-        // let tmp = str.split("\r\n");
+    console.log("convertCsvToArray");
+    // let tmp = str.split("\r\n");
 
-        // for (let i = 0; i < tmp.length; ++i) {
-        //     result[i] = tmp[i].split(',');
-        // }
+    // for (let i = 0; i < tmp.length; ++i) {
+    //     result[i] = tmp[i].split(',');
+    // }
 
-        let splitValue = (/,|\r\n/g);
-        result = str.split(splitValue);
+    let splitValue = (/,|\r\n/g);
+    result = str.split(splitValue);
 
-        console.log(result);
-        callback();
-    }, 1000);
+    console.log(result);
 
 }
 
 function addPoints() {
     console.log("addPoints");
-    for (let i = 0; i < result.length; i++) {
-        const x = parseFloat(result[i])*100;
-        
-        const y = parseFloat(result[i])*100;
-        const z = parseFloat(result[i])*100;
-        if(i===6000){
-            console.log(i);
-        }
+    for (let i = 0; i < result.length; i += 3) {
+        const x = parseFloat(result[i])*5;
+
+        const y = parseFloat(result[i + 1])*5;
+        const z = parseFloat(result[i + 2])*5;
         vertices.push(x, z, y);
     }
 }
@@ -161,31 +153,49 @@ function onWindowResize() {
 
 /*--------------------処理を書く--------------------*/
 
-init();
-getCsv();
+const promise = new Promise((resolve, reject) => {
+    init();
+    getCsv();
 
 
-console.log(vertices);
+    console.log(vertices);
+    setTimeout(() => {
+        resolve();
+    }, 1500);
+
+})
+    .then(() => {
+        addPoints();
+        console.log(vertices);
+
+        // 形状データを作成
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        //geometry.boundingSphere(null);
+
+        // マテリアルを作成
+        const material = new THREE.PointsMaterial({
+            // 一つ一つのサイズ
+            size: 2,
+            // 色
+            color: 0x11eaff,
+        });
+
+
+        // 物体を作成
+        const mesh = new THREE.Points(geometry, material);
+        scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
+
+
+        render();
+
+
+    })
+    .catch(() => {
+        console.log("reject");
+    });
 
 
 
-// 形状データを作成
-const geometry = new THREE.BufferGeometry();
-geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
-// マテリアルを作成
-const material = new THREE.PointsMaterial({
-    // 一つ一つのサイズ
-    size: 10,
-    // 色
-    color: 0x11eaff,
-});
-
-
-// 物体を作成
-const mesh = new THREE.Points(geometry, material);
-scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
-
-
-render();
 
