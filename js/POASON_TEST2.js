@@ -122,11 +122,11 @@ function convertCsvToArray(str) {
 
 function addPoints() {
     console.log("addPoints");
-    for (let i = 0; i < result.length; i += 3) {
-        const x = parseFloat(result[i])*5;
+    for (let i = 0; i < result.length; i = i + 3) {
+        const x = parseFloat(result[i])*20;
 
         const y = parseFloat(result[i + 1])*5;
-        const z = parseFloat(result[i + 2])*5;
+        const z = parseFloat(result[i + 2])*15;
         vertices.push(x, z, y);
     }
 }
