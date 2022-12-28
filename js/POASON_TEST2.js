@@ -62,6 +62,8 @@ scene.add(helper);
 
 /*--------------------変数の宣言--------------------*/
 
+const loadBookNum = "02";
+
 let result = [];
 
 //各軸の頂点数
@@ -94,7 +96,13 @@ function init() {
 function getCsv() {
     console.log("getCSV");
     let req = new XMLHttpRequest();
-    req.open("get", "../data/poten2d_0V-0V.csv", true);
+    if (loadBookNum === "00") {
+        req.open("get", "../data/poten2d_0V-0V.csv", true);
+    }else if(loadBookNum === "02") {
+        req.open("get", "../data/poten2d_0V-2V.csv", true);
+    }else {
+        req.open("get", "../data/poten2d_2V-2V.csv", true);
+    }
     req.send(null);
 
     req.onload = function () {
@@ -123,10 +131,10 @@ function convertCsvToArray(str) {
 function addPoints() {
     console.log("addPoints");
     for (let i = 0; i < result.length; i = i + 3) {
-        const x = parseFloat(result[i])*20;
+        const x = parseFloat(result[i]) * 20;
 
-        const y = parseFloat(result[i + 1])*5;
-        const z = parseFloat(result[i + 2])*15;
+        const y = parseFloat(result[i + 1]) * 5;
+        const z = parseFloat(result[i + 2]) * 15;
         vertices.push(x, z, y);
     }
 }
