@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-// import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.js';
+import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
 
@@ -60,11 +60,54 @@ helper.material.opacity = 0.25;
 helper.material.transparent = true;
 scene.add(helper);
 
+
+// 形状データを作成
+const geometry = new THREE.BufferGeometry();
+//geometry.attributes.position.needsUpdate = true; // 最初のレンダリング後に必要
+// マテリアルを作成
+const material = new THREE.PointsMaterial({
+    // 一つ一つのサイズ
+    size: 2,
+    // 色
+    color: 0x11eaff,
+});
+// 物体を作成
+const mesh = new THREE.Points(geometry, material);
+scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
+
+
+
+//GUIのパラメータ
+let slider;
+const params = {
+    gateValue: 0.0,
+};
+//GUIの設定
+const gui = new GUI();
+//onChange(event) => 値が変更されるたびにonChange内のeventが呼び出される。
+//gui.add（object , property , min , max ,`step`）
+//第五引数のstepはstep()で設定でき、可読性も高いので、step()で設定しています。
+gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
+
+    slider = value;
+    vertices.length=0; //点群を初期化
+    addPoints();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    render();
+
+});
+gui.open();
+
+
+
 /*--------------------変数の宣言--------------------*/
 
-const loadBookNum = "02";
 
-let result = [];
+
+// const loadBookNum = "02";
+
+let ver02 = [];
+let ver22 = [];
 
 //各軸の頂点数
 const N = 6803;
@@ -89,52 +132,56 @@ const SCALE_Z = 50;
 function init() {
     /*----------初期化処理----------*/
     console.log("init");
-    //console.log("out result");
-    //console.log(result);
+    //console.log("out ver02");
+    //console.log(ver02);
 }
 
 function getCsv() {
     console.log("getCSV");
-    let req = new XMLHttpRequest();
-    if (loadBookNum === "00") {
-        req.open("get", "../data/poten2d_0V-0V.csv", true);
-    }else if(loadBookNum === "02") {
-        req.open("get", "../data/poten2d_0V-2V.csv", true);
-    }else {
-        req.open("get", "../data/poten2d_2V-2V.csv", true);
-    }
-    req.send(null);
+    let req02 = new XMLHttpRequest();
+    let req22 = new XMLHttpRequest();
 
-    req.onload = function () {
-        console.log("onload");
-        convertCsvToArray(req.responseText);
+    req02.open("get", "../data/poten2d_0V-2V.csv", true);
+    req02.send(null);
+    req02.onload = function () {
+        console.log("onload02");
+        ver02 = convertCsvToArray(req02.responseText);
     }
 
+    req22.open("get", "../data/poten2d_2V-2V.csv", true);
+    req22.send(null);
+    req22.onload = function () {
+        console.log("onload22");
+        ver22 = convertCsvToArray(req22.responseText);
+    }
 }
 
 function convertCsvToArray(str) {
 
     console.log("convertCsvToArray");
-    // let tmp = str.split("\r\n");
-
-    // for (let i = 0; i < tmp.length; ++i) {
-    //     result[i] = tmp[i].split(',');
-    // }
 
     let splitValue = (/,|\r\n/g);
-    result = str.split(splitValue);
 
-    console.log(result);
+    return str.split(splitValue);
 
 }
 
 function addPoints() {
     console.log("addPoints");
-    for (let i = 0; i < result.length; i = i + 3) {
-        const x = parseFloat(result[i]) * 20;
+    //一つの状態の電荷分布を表示する
+    // for (let i = 0; i < ver02.length; i = i + 3) {
+    //     const x = parseFloat(ver02[i]) * 20;
 
-        const y = parseFloat(result[i + 1]) * 5;
-        const z = parseFloat(result[i + 2]) * 15;
+    //     const y = parseFloat(ver02[i + 1]) * 5;
+    //     const z = parseFloat(ver02[i + 2]) * 15;
+    //     vertices.push(x, z, y);
+    // }
+
+    //線形補間
+    for (let i = 0; i < ver02.length; i = i + 3) {
+        const x = parseFloat(ver02[i]) * 20;
+        const y = parseFloat(ver02[i + 1]) * 5;
+        const z = parseFloat(ver02[i + 2] - (ver02[i + 2] - ver22[i + 2]) * slider) * 20;
         vertices.push(x, z, y);
     }
 }
@@ -142,6 +189,7 @@ function addPoints() {
 //レンダリング時に実行したい処理をここに書く
 function render() {
 
+    mesh.geometry.attributes.position.needsUpdate = true;
     renderer.render(scene, camera);
 
 }
@@ -173,31 +221,32 @@ const promise = new Promise((resolve, reject) => {
 
 })
     .then(() => {
+        slider = 0.0; //sliderの初期値（これがないとページ更新時に点群が表示されない）
         addPoints();
         console.log(vertices);
 
-        // 形状データを作成
-        const geometry = new THREE.BufferGeometry();
+        // // 形状データを作成
+        // const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        //geometry.boundingSphere(null);
 
-        // マテリアルを作成
-        const material = new THREE.PointsMaterial({
-            // 一つ一つのサイズ
-            size: 2,
-            // 色
-            color: 0x11eaff,
-        });
+        // // マテリアルを作成
+        // const material = new THREE.PointsMaterial({
+        //     // 一つ一つのサイズ
+        //     size: 2,
+        //     // 色
+        //     color: 0x11eaff,
+        // });
 
 
-        // 物体を作成
-        const mesh = new THREE.Points(geometry, material);
-        scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
+        // // 物体を作成
+        // const mesh = new THREE.Points(geometry, material);
+        //scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
 
 
         render();
-
-
+        
+        // line.geometry.computeBoundingBox();
+        // line.geometry.computeBoundingSphere();
     })
     .catch(() => {
         console.log("reject");
