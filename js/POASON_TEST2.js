@@ -78,9 +78,11 @@ scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
 
 
 //GUIのパラメータ
-let slider;
+let Gslider;
+let Dslider;
 const params = {
     gateValue: 0.0,
+    drainValue: 0.0,
 };
 //GUIの設定
 const gui = new GUI();
@@ -89,7 +91,16 @@ const gui = new GUI();
 //第五引数のstepはstep()で設定でき、可読性も高いので、step()で設定しています。
 gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 
-    slider = value;
+    Gslider = value;
+    vertices.length=0; //点群を初期化
+    addPoints();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    render();
+
+});
+gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
+
+    Dslider = value;
     vertices.length=0; //点群を初期化
     addPoints();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
@@ -106,8 +117,10 @@ gui.open();
 
 // const loadBookNum = "02";
 
+let ver00 = [];
 let ver02 = [];
-let ver22 = [];
+let ver20 = [];
+
 
 //各軸の頂点数
 const N = 6803;
@@ -138,8 +151,16 @@ function init() {
 
 function getCsv() {
     console.log("getCSV");
+    let req00 = new XMLHttpRequest();
     let req02 = new XMLHttpRequest();
-    let req22 = new XMLHttpRequest();
+    let req20 = new XMLHttpRequest();
+
+    req00.open("get", "../data/poten2d_0V-0V.csv", true);
+    req00.send(null);
+    req00.onload = function () {
+        console.log("onload00");
+        ver00 = convertCsvToArray(req00.responseText);
+    }
 
     req02.open("get", "../data/poten2d_0V-2V.csv", true);
     req02.send(null);
@@ -148,12 +169,14 @@ function getCsv() {
         ver02 = convertCsvToArray(req02.responseText);
     }
 
-    req22.open("get", "../data/poten2d_2V-2V.csv", true);
-    req22.send(null);
-    req22.onload = function () {
-        console.log("onload22");
-        ver22 = convertCsvToArray(req22.responseText);
+    req20.open("get", "../data/poten2d_2V-0V.csv", true);
+    req20.send(null);
+    req20.onload = function () {
+        console.log("onload20");
+        ver20 = convertCsvToArray(req20.responseText);
     }
+
+
 }
 
 function convertCsvToArray(str) {
@@ -179,11 +202,16 @@ function addPoints() {
 
     //線形補間
     for (let i = 0; i < ver02.length; i = i + 3) {
-        const x = parseFloat(ver02[i]) * 20;
-        const y = parseFloat(ver02[i + 1]) * 5;
-        const z = parseFloat(ver02[i + 2] - (ver02[i + 2] - ver22[i + 2]) * slider) * 20;
+        const x = parseFloat(ver00[i]) * 20;
+        const y = parseFloat(ver00[i + 1]) * 5;
+        const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver02[i + 2]) * Dslider - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
+        //const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
+        //const z = parseFloat(ver20[i + 2]) * 20;
+
+        
         vertices.push(x, z, y);
     }
+    console.log(vertices);
 }
 
 //レンダリング時に実行したい処理をここに書く
@@ -221,7 +249,8 @@ const promise = new Promise((resolve, reject) => {
 
 })
     .then(() => {
-        slider = 0.0; //sliderの初期値（これがないとページ更新時に点群が表示されない）
+        Dslider = 0.0; //sliderの初期値（これがないとページ更新時に点群が表示されない）
+        Gslider = 0.0;
         addPoints();
         console.log(vertices);
 
