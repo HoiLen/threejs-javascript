@@ -204,7 +204,8 @@ function addPoints() {
     for (let i = 0; i < ver02.length; i = i + 3) {
         const x = parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
-        const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver02[i + 2]) * Dslider - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
+        const z = parseFloat(ver00[i + 2]*20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 35 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
+        //const z = parseFloat(ver00[i + 2]*20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
         //const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
         //const z = parseFloat(ver20[i + 2]) * 20;
 
