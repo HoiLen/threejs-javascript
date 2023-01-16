@@ -1,3 +1,10 @@
+var attr = function (node, name, value) {
+    if (typeof value === 'undefined') {
+        return node.getAttribute(name);
+    }
+    node.setAttribute(name, value);
+};
+
 var chartCanvas;
 
 chartCanvas = document.createElement("canvas");
@@ -9,13 +16,14 @@ chartCanvas.id = 'chartcanvas';
 var cbox = document.getElementById('container');
 cbox.appendChild(chartCanvas);
 
-var ctx = document.getElementById('chartcanvas');
-ctx.width = 3;
-ctx.height = 1;
-ctx.style.width = "300px";
-ctx.style.height = "100px";
-// window.document.getElementById('chartcanvas').style.width="100px";
-// window.document.getElementById('chartcanvas').style.height="100px";
+var ctx = document.querySelector("#chartcanvas");
+//var ctx = document.getElementById('chartcanvas');
+ctx.width = 16;
+ctx.height = 9;
+
+// attr(ctx, 'width', '200px');
+// ctx.style.width = "300px";
+//ctx.style.height = "300px";
 
 var graphChart = new Chart(ctx, {
     type: 'line',
@@ -129,3 +137,6 @@ var graphChart = new Chart(ctx, {
         },
     },
 });
+
+
+ctx.parentNode.style.width='500px';

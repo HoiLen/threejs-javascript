@@ -1,13 +1,14 @@
 #container {
     position: relative;
+    /* width:500px;
+    height: 500px; */
 }
 
 #container canvas {
     position: absolute;
-    top: 0;
-    left: 0;
 }
 
-/* #chartcanvas {
-    
-} */
+#chartcanvas {
+    /* width: 300px; */
+    /* aspect-ratio: 16/9; */
+}
