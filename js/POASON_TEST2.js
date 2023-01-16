@@ -56,7 +56,7 @@ window.addEventListener('resize', onWindowResize);
 //x-y平面のグリットの設定
 const helper = new THREE.GridHelper(2000, 100);
 helper.position.y = - 199;
-helper.material.opacity = 0.25;
+helper.material.opacity = 0.10;
 helper.material.transparent = true;
 scene.add(helper);
 
