@@ -3,6 +3,13 @@ import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
 
+
+
+
+
+
+/*------------------------------------ここからthree.js------------------------------------*/
+
 //htmlからcontainer要素を取り出す。
 const container = document.getElementById('container');
 
@@ -78,8 +85,8 @@ scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
 
 
 //GUIのパラメータ
-let Gslider;
-let Dslider;
+let Gslider = 0.0;
+let Dslider = 0.0;
 const params = {
     gateValue: 0.0,
     drainValue: 0.0,
@@ -92,7 +99,10 @@ const gui = new GUI();
 gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 
     Gslider = value;
-    vertices.length=0; //点群を初期化
+    data[0] = {x:'0', red:20+Gslider*10};
+    myChart.update();
+    //myChart.update();
+    vertices.length = 0; //点群を初期化
     addPoints();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
     render();
@@ -101,7 +111,8 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
 
     Dslider = value;
-    vertices.length=0; //点群を初期化
+    //myChart.update();
+    vertices.length = 0; //点群を初期化
     addPoints();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
     render();
@@ -204,12 +215,12 @@ function addPoints() {
     for (let i = 0; i < ver02.length; i = i + 3) {
         const x = parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
-        const z = parseFloat(ver00[i + 2]*20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 35 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
+        const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 35 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
         //const z = parseFloat(ver00[i + 2]*20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
         //const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
         //const z = parseFloat(ver20[i + 2]) * 20;
 
-        
+
         vertices.push(x, z, y);
     }
     console.log(vertices);
@@ -217,7 +228,8 @@ function addPoints() {
 
 //レンダリング時に実行したい処理をここに書く
 function render() {
-
+    //myChart.update();
+    
     mesh.geometry.attributes.position.needsUpdate = true;
     renderer.render(scene, camera);
 
@@ -250,8 +262,8 @@ const promise = new Promise((resolve, reject) => {
 
 })
     .then(() => {
-        Dslider = 0.0; //sliderの初期値（これがないとページ更新時に点群が表示されない）
-        Gslider = 0.0;
+        //Dslider = 0.0; //sliderの初期値（これがないとページ更新時に点群が表示されない）
+        //Gslider = 0.0;
         addPoints();
         console.log(vertices);
 
@@ -274,7 +286,7 @@ const promise = new Promise((resolve, reject) => {
 
 
         render();
-        
+
         // line.geometry.computeBoundingBox();
         // line.geometry.computeBoundingSphere();
     })
@@ -285,4 +297,47 @@ const promise = new Promise((resolve, reject) => {
 
 
 
+
+/*------------------------------------ここからchart.js------------------------------------*/
+
+var chartCanvas;
+
+chartCanvas = document.createElement("canvas");
+chartCanvas.id = 'chartcanvas';
+
+var cbox = document.getElementById('container');
+cbox.appendChild(chartCanvas);
+
+var ctx = document.querySelector("#chartcanvas");
+ctx.width = 16;
+ctx.height = 9;
+
+var testn = 9;
+
+var data = [
+    { x: '0', red: 20 },
+    { x: 'Th', red: 35 },
+    { x: 'Over', red: 40 },
+    { x: ' ', red: 44 },
+    { x: '  ', red: 47 },
+    { x: '   ', red: 49 },
+    { x: 'Dorain Voltage', red: 50 },
+];
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        //labels: ['0', 'Th', 'Over'],
+        datasets: [{
+            label: 'Red',
+            borderColor: '#f00',
+            data: data,
+            parsing: { yAxisKey: 'red' },
+        }
+        ],
+    },
+    options: {
+        animation: false,
+    },
+});
+ctx.parentNode.style.width = '500px';
 
