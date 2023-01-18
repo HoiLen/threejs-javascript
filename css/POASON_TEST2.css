@@ -8,7 +8,6 @@
     position: absolute;
 }
 
-#chartcanvas {
-    /* width: 300px; */
-    /* aspect-ratio: 16/9; */
+#idvgcanvas {
+    margin-top: 270px;
 }
