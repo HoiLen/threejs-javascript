@@ -141,10 +141,10 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
             data[i].red = 0;
         }
         else if (data[i].x < (Gslider * 2 - V_th)) {
-            data[i].red = (Gslider * 2 - V_th) * data[i].x - ((data[i].x) ^ 2)/2;
+            data[i].red = (Gslider * 2 - V_th) * data[i].x - ((data[i].x) ** 2)/2;
         }
         else if(data[i].x >= (Gslider * 2 - V_th)){
-            data[i].red = ((Gslider * 2 - V_th) ^ 2)/2;
+            data[i].red = ((Gslider * 2 - V_th) ** 2)/2;
         }
     };
     console.log("data");
@@ -176,10 +176,10 @@ gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
             datavg[i].red = 0;
         }
         else if (Dslider * 2 < (datavg[i].x - V_th)) {
-            datavg[i].red = (datavg[i].x - V_th) * Dslider * 2 - ((Dslider * 2) ^ 2)/2;
+            datavg[i].red = (datavg[i].x - V_th) * Dslider * 2 - ((Dslider * 2) ** 2)/2;
         }
         else if (Dslider * 2 >= (datavg[i].x - V_th)){
-            datavg[i].red = ((datavg[i].x - V_th) ^ 2)/2;
+            datavg[i].red = ((datavg[i].x - V_th) ** 2)/2;
         }
     };
 
@@ -379,7 +379,7 @@ vgx.height = 1
 //     { x: 'Dorain Vol', red: 34 },
 // ];
 var data = [
-    { x: 0, red: 20 },
+    { x: 0.0, red: 20 },
     { x: 0.1, red: 28 },
     { x: 0.2, red: 33 },
     { x: 0.3, red: 34 },
@@ -455,7 +455,7 @@ var idvdChart = new Chart(ctx, {
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
                 tension: 0.3,
-                pointRadius: 0,
+                pointRadius: 1,
             },
             {
                 label: 'blue',
