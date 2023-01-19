@@ -4,8 +4,37 @@ import { OrbitControls } from '../node_modules/three/examples/jsm/controls/Orbit
 //import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
 
 
+/*--------------------変数の宣言--------------------*/
 
 
+
+// const loadBookNum = "02";
+
+let ver00 = [];
+let ver02 = [];
+let ver20 = [];
+
+
+//各軸の頂点数
+const N = 6803;
+
+//刻み幅
+const dt = Math.PI / 8;
+
+//計算式の最大値
+const MAX = 400;
+
+
+//計算した頂点の格納
+const vertices = [];
+//平面グラフの縮尺調整
+const SCALE_XY = 1000;
+//縦軸グラフの縮尺調整
+const SCALE_Z = 50;
+
+
+//スレッショルド電圧
+const V_th = 0.6;
 
 
 /*------------------------------------ここからthree.js------------------------------------*/
@@ -100,15 +129,29 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 
     Gslider = value;
 
-    data[1].red = 28 + Gslider * 15;
-    data[2].red = 33 + Gslider * 15;
-    data[3].red = 34 + Gslider * 15;
-    data[4].red = 34 + Gslider * 15;
-    data[5].red = 34 + Gslider * 15;
-    data[6].red = 34 + Gslider * 15;
+    // data[1].red = 28 + Gslider * 15;
+    // data[2].red = 33 + Gslider * 15;
+    // data[3].red = 34 + Gslider * 15;
+    // data[4].red = 34 + Gslider * 15;
+    // data[5].red = 34 + Gslider * 15;
+    // data[6].red = 34 + Gslider * 15;
 
-    dataBVG[0].x = Gslider * 6;
-    dataBVG[1].x = Gslider * 6;
+    for (let i = 0; i < data.length; i++) {
+        if (Gslider*2 < V_th) {
+            data[i].red = 0;
+        }
+        else if (data[i].x < (Gslider * 2 - V_th)) {
+            data[i].red = (Gslider * 2 - V_th) * data[i].x - ((data[i].x) ^ 2)/2;
+        }
+        else if(data[i].x >= (Gslider * 2 - V_th)){
+            data[i].red = ((Gslider * 2 - V_th) ^ 2)/2;
+        }
+    };
+    console.log("data");
+    console.log(data);
+
+    dataBVG[0].x = Gslider * 2;
+    dataBVG[1].x = Gslider * 2;
 
     idvdChart.update();
     idvgChart.update();
@@ -123,13 +166,25 @@ gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
 
     Dslider = value;
 
-    datavg[3].red = 18 + Dslider * 8;
-    datavg[4].red = 32 + Dslider * 20;
-    datavg[5].red = 56 + Dslider * 30;
-    datavg[6].red = 80 + Dslider * 70;
+    // datavg[3].red = 18 + Dslider * 8;
+    // datavg[4].red = 32 + Dslider * 20;
+    // datavg[5].red = 56 + Dslider * 30;
+    // datavg[6].red = 80 + Dslider * 70;
 
-    dataBVD[0].x = Dslider * 6;
-    dataBVD[1].x = Dslider * 6;
+    for (let i = 0; i < datavg.length; i++) {
+        if (datavg[i].x < V_th) {
+            datavg[i].red = 0;
+        }
+        else if (Dslider * 2 < (datavg[i].x - V_th)) {
+            datavg[i].red = (datavg[i].x - V_th) * Dslider * 2 - ((Dslider * 2) ^ 2)/2;
+        }
+        else if (Dslider * 2 >= (datavg[i].x - V_th)){
+            datavg[i].red = ((datavg[i].x - V_th) ^ 2)/2;
+        }
+    };
+
+    dataBVD[0].x = Dslider * 2;
+    dataBVD[1].x = Dslider * 2;
 
 
     idvgChart.update();
@@ -145,33 +200,6 @@ gui.open();
 
 
 
-/*--------------------変数の宣言--------------------*/
-
-
-
-// const loadBookNum = "02";
-
-let ver00 = [];
-let ver02 = [];
-let ver20 = [];
-
-
-//各軸の頂点数
-const N = 6803;
-
-//刻み幅
-const dt = Math.PI / 8;
-
-//計算式の最大値
-const MAX = 400;
-
-
-//計算した頂点の格納
-const vertices = [];
-//平面グラフの縮尺調整
-const SCALE_XY = 1000;
-//縦軸グラフの縮尺調整
-const SCALE_Z = 50;
 
 
 /*--------------------関数--------------------*/
@@ -225,14 +253,6 @@ function convertCsvToArray(str) {
 
 function addPoints() {
     console.log("addPoints");
-    //一つの状態の電荷分布を表示する
-    // for (let i = 0; i < ver02.length; i = i + 3) {
-    //     const x = parseFloat(ver02[i]) * 20;
-
-    //     const y = parseFloat(ver02[i + 1]) * 5;
-    //     const z = parseFloat(ver02[i + 2]) * 15;
-    //     vertices.push(x, z, y);
-    // }
 
     //線形補間
     for (let i = 0; i < ver02.length; i = i + 3) {
@@ -248,6 +268,10 @@ function addPoints() {
     }
     console.log(vertices);
 }
+
+// function calcId() {
+
+// }
 
 //レンダリング時に実行したい処理をここに書く
 function render() {
@@ -356,21 +380,56 @@ vgx.height = 1
 // ];
 var data = [
     { x: 0, red: 20 },
-    { x: 1, red: 28 },
-    { x: 2, red: 33 },
-    { x: 3, red: 34 },
-    { x: 4, red: 34 },
-    { x: 5, red: 34 },
-    { x: 6, red: 34 },
+    { x: 0.1, red: 28 },
+    { x: 0.2, red: 33 },
+    { x: 0.3, red: 34 },
+    { x: 0.4, red: 34 },
+    { x: 0.5, red: 34 },
+    { x: 0.6, red: 34 },
+    { x: 0.7, red: 28 },
+    { x: 0.8, red: 33 },
+    { x: 0.9, red: 34 },
+    { x: 1.0, red: 34 },
+    { x: 1.1, red: 34 },
+    { x: 1.2, red: 34 },
+    { x: 1.3, red: 28 },
+    { x: 1.4, red: 33 },
+    { x: 1.5, red: 34 },
+    { x: 1.6, red: 34 },
+    { x: 1.7, red: 34 },
+    { x: 1.8, red: 34 },
+    { x: 1.9, red: 34 },
+    { x: 2.0, red: 34 },
 ];
 var datavg = [
-    { x: 0, red: 0 },
-    { x: 1, red: 4 },
-    { x: 2, red: 10 },
-    { x: 3, red: 18 },
-    { x: 4, red: 32 },
-    { x: 5, red: 56 },
-    { x: 6, red: 80 },
+    // { x: 0, red: 0 },
+    // { x: 1, red: 4 },
+    // { x: 2, red: 10 },
+    // { x: 3, red: 18 },
+    // { x: 4, red: 32 },
+    // { x: 5, red: 56 },
+    // { x: 6, red: 80 },
+    { x: 0, red: 20 },
+    { x: 0.1, red: 28 },
+    { x: 0.2, red: 33 },
+    { x: 0.3, red: 34 },
+    { x: 0.4, red: 34 },
+    { x: 0.5, red: 34 },
+    { x: 0.6, red: 34 },
+    { x: 0.7, red: 28 },
+    { x: 0.8, red: 33 },
+    { x: 0.9, red: 34 },
+    { x: 1.0, red: 34 },
+    { x: 1.1, red: 34 },
+    { x: 1.2, red: 34 },
+    { x: 1.3, red: 28 },
+    { x: 1.4, red: 33 },
+    { x: 1.5, red: 34 },
+    { x: 1.6, red: 34 },
+    { x: 1.7, red: 34 },
+    { x: 1.8, red: 34 },
+    { x: 1.9, red: 34 },
+    { x: 2.0, red: 34 },
 ];
 var dataBVD = [
     { x: 0, red: 0 },
@@ -416,18 +475,18 @@ var idvdChart = new Chart(ctx, {
         scales: {
             x: {
                 min: 0,
-                max: 6,
+                max: 2,
                 ticks: {
                     stepSize: 0.05 * 6,
                     // maxTicksLimit: 100,
                 },
             },
             y: {
-                max: 60,
-                min: 20,
+                min: 0,
+                max: 5,
                 ticks: {
                     stepSize: 5,
-                    display: false,
+                    //display: false,
                 },
             },
         },
@@ -471,18 +530,18 @@ var idvgChart = new Chart(vgx, {
         scales: {
             x: {
                 min: 0,
-                max: 6,
+                max: 2,
                 ticks: {
                     stepSize: 0.05 * 6,
                     // maxTicksLimit: 100,
                 },
             },
             y: {
-                max: 80,
                 min: 0,
+                max: 5,
                 ticks: {
                     stepSize: 5,
-                    display: false,
+                    //display: false,
                 },
             },
         },
