@@ -47,14 +47,15 @@ const container = document.getElementById('container');
 
 //シーン
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0x555555);
 //カメラ
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
 camera.position.set(0, 500, 1000);
 scene.add(camera);
 //環境光
 scene.add(new THREE.AmbientLight(0xf0f0f0));
-const light = new THREE.SpotLight(0xffffff);
+// const light = new THREE.SpotLight(0xffffff);
+const light = new THREE.DirectionalLight(0xffffff);
 light.position.set(0, 1500, 200);
 light.angle = Math.PI * 0.2;
 light.castShadow = true;
@@ -101,11 +102,20 @@ scene.add(helper);
 const geometry = new THREE.BufferGeometry();
 //geometry.attributes.position.needsUpdate = true; // 最初のレンダリング後に必要
 // マテリアルを作成
+// const material = new THREE.MeshBasicMaterial({
+//     // 一つ一つのサイズ
+//     //fog: true,
+//     // 色
+//     color:0x11eaff,
+//     //wireframe:false,
+// });
 const material = new THREE.PointsMaterial({
     // 一つ一つのサイズ
     size: 2,
     // 色
-    color: 0x11eaff,
+    //color: 0x11eaff,
+
+    vertexColors: true,
 });
 // 物体を作成
 const mesh = new THREE.Points(geometry, material);
@@ -152,6 +162,10 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 
     dataBVG[0].x = Gslider * 2;
     dataBVG[1].x = Gslider * 2;
+    let vgnum = parseFloat(Gslider*20);
+    let vdnum = parseFloat(Dslider*20);
+    dataBVG[1].red = datavg[vgnum].red;
+    dataBVD[1].red = data[vdnum].red;
 
     idvdChart.update();
     idvgChart.update();
@@ -185,7 +199,13 @@ gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
 
     dataBVD[0].x = Dslider * 2;
     dataBVD[1].x = Dslider * 2;
-
+    let vgnum = parseFloat(Gslider*20);
+    let vdnum = parseFloat(Dslider*20);
+    // console.log(idid);
+    // console.log(data[idid].red);
+    dataBVG[1].red = datavg[vgnum].red;
+    dataBVD[1].red = data[vdnum].red;
+    
 
     idvgChart.update();
     idvdChart.update();
@@ -258,7 +278,7 @@ function addPoints() {
     for (let i = 0; i < ver02.length; i = i + 3) {
         const x = parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
-        const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 35 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 45));
+        const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 45));
         //const z = parseFloat(ver00[i + 2]*20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
         //const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
         //const z = parseFloat(ver20[i + 2]) * 20;
@@ -379,27 +399,27 @@ vgx.height = 1
 //     { x: 'Dorain Vol', red: 34 },
 // ];
 var data = [
-    { x: 0.0, red: 20 },
-    { x: 0.1, red: 28 },
-    { x: 0.2, red: 33 },
-    { x: 0.3, red: 34 },
-    { x: 0.4, red: 34 },
-    { x: 0.5, red: 34 },
-    { x: 0.6, red: 34 },
-    { x: 0.7, red: 28 },
-    { x: 0.8, red: 33 },
-    { x: 0.9, red: 34 },
-    { x: 1.0, red: 34 },
-    { x: 1.1, red: 34 },
-    { x: 1.2, red: 34 },
-    { x: 1.3, red: 28 },
-    { x: 1.4, red: 33 },
-    { x: 1.5, red: 34 },
-    { x: 1.6, red: 34 },
-    { x: 1.7, red: 34 },
-    { x: 1.8, red: 34 },
-    { x: 1.9, red: 34 },
-    { x: 2.0, red: 34 },
+    { x: 0.0, red: 0 },
+    { x: 0.1, red: 0 },
+    { x: 0.2, red: 0 },
+    { x: 0.3, red: 0 },
+    { x: 0.4, red: 0 },
+    { x: 0.5, red: 0 },
+    { x: 0.6, red: 0 },
+    { x: 0.7, red: 0 },
+    { x: 0.8, red: 0 },
+    { x: 0.9, red: 0 },
+    { x: 1.0, red: 0 },
+    { x: 1.1, red: 0 },
+    { x: 1.2, red: 0 },
+    { x: 1.3, red: 0 },
+    { x: 1.4, red: 0 },
+    { x: 1.5, red: 0 },
+    { x: 1.6, red: 0 },
+    { x: 1.7, red: 0 },
+    { x: 1.8, red: 0 },
+    { x: 1.9, red: 0 },
+    { x: 2.0, red: 0 },
 ];
 var datavg = [
     // { x: 0, red: 0 },
@@ -409,35 +429,35 @@ var datavg = [
     // { x: 4, red: 32 },
     // { x: 5, red: 56 },
     // { x: 6, red: 80 },
-    { x: 0, red: 20 },
-    { x: 0.1, red: 28 },
-    { x: 0.2, red: 33 },
-    { x: 0.3, red: 34 },
-    { x: 0.4, red: 34 },
-    { x: 0.5, red: 34 },
-    { x: 0.6, red: 34 },
-    { x: 0.7, red: 28 },
-    { x: 0.8, red: 33 },
-    { x: 0.9, red: 34 },
-    { x: 1.0, red: 34 },
-    { x: 1.1, red: 34 },
-    { x: 1.2, red: 34 },
-    { x: 1.3, red: 28 },
-    { x: 1.4, red: 33 },
-    { x: 1.5, red: 34 },
-    { x: 1.6, red: 34 },
-    { x: 1.7, red: 34 },
-    { x: 1.8, red: 34 },
-    { x: 1.9, red: 34 },
-    { x: 2.0, red: 34 },
+    { x: 0.0, red: 0 },
+    { x: 0.1, red: 0 },
+    { x: 0.2, red: 0 },
+    { x: 0.3, red: 0 },
+    { x: 0.4, red: 0 },
+    { x: 0.5, red: 0 },
+    { x: 0.6, red: 0 },
+    { x: 0.7, red: 0 },
+    { x: 0.8, red: 0 },
+    { x: 0.9, red: 0 },
+    { x: 1.0, red: 0 },
+    { x: 1.1, red: 0 },
+    { x: 1.2, red: 0 },
+    { x: 1.3, red: 0 },
+    { x: 1.4, red: 0 },
+    { x: 1.5, red: 0 },
+    { x: 1.6, red: 0 },
+    { x: 1.7, red: 0 },
+    { x: 1.8, red: 0 },
+    { x: 1.9, red: 0 },
+    { x: 2.0, red: 0 },
 ];
 var dataBVD = [
     { x: 0, red: 0 },
-    { x: 0, red: 100 },
+    { x: 0, red: 0 },
 ];
 var dataBVG = [
     { x: 0, red: 0 },
-    { x: 0, red: 100 },
+    { x: 0, red: 0 },
 ];
 
 
@@ -455,7 +475,7 @@ var idvdChart = new Chart(ctx, {
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
                 tension: 0.3,
-                pointRadius: 1,
+                pointRadius: 2,
             },
             {
                 label: 'blue',
@@ -464,7 +484,7 @@ var idvdChart = new Chart(ctx, {
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
                 tension: 0.3,
-                pointRadius: 0,
+                pointRadius: 8,
             }
         ],
     },
@@ -483,7 +503,7 @@ var idvdChart = new Chart(ctx, {
             },
             y: {
                 min: 0,
-                max: 5,
+                max: 2,
                 ticks: {
                     stepSize: 5,
                     //display: false,
@@ -511,7 +531,7 @@ var idvgChart = new Chart(vgx, {
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
                 tension: 0.4,
-                pointRadius: 0,
+                pointRadius: 2,
             },
             {
                 label: 'blue',
@@ -520,7 +540,7 @@ var idvgChart = new Chart(vgx, {
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
                 tension: 0.3,
-                pointRadius: 0,
+                pointRadius: 8,
             }
         ],
     },
@@ -538,7 +558,7 @@ var idvgChart = new Chart(vgx, {
             },
             y: {
                 min: 0,
-                max: 5,
+                max: 2,
                 ticks: {
                     stepSize: 5,
                     //display: false,
