@@ -503,7 +503,7 @@ var idvdChart = new Chart(ctx, {
             },
             y: {
                 min: 0,
-                max: 2,
+                max: 1.5,
                 ticks: {
                     stepSize: 5,
                     //display: false,
@@ -558,7 +558,7 @@ var idvgChart = new Chart(vgx, {
             },
             y: {
                 min: 0,
-                max: 2,
+                max: 1.5,
                 ticks: {
                     stepSize: 5,
                     //display: false,
