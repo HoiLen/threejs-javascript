@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+import { Color } from 'three';
 //import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
 
 
@@ -27,6 +28,8 @@ const MAX = 400;
 
 //計算した頂点の格納
 const vertices = [];
+//頂点カラーの格納
+const Cvert = [];
 //平面グラフの縮尺調整
 const SCALE_XY = 1000;
 //縦軸グラフの縮尺調整
@@ -88,6 +91,7 @@ controls.addEventListener('change', render);//カメラの位置情報が更新�
 //     controls.enabled = !event.value;
 // });
 // scene.add(transformControl);
+
 window.addEventListener('resize', onWindowResize);
 
 //x-y平面のグリットの設定
@@ -100,21 +104,11 @@ scene.add(helper);
 
 // 形状データを作成
 const geometry = new THREE.BufferGeometry();
-//geometry.attributes.position.needsUpdate = true; // 最初のレンダリング後に必要
-// マテリアルを作成
-// const material = new THREE.MeshBasicMaterial({
-//     // 一つ一つのサイズ
-//     //fog: true,
-//     // 色
-//     color:0x11eaff,
-//     //wireframe:false,
-// });
+// 材質データを作成
 const material = new THREE.PointsMaterial({
     // 一つ一つのサイズ
-    size: 2,
-    // 色
-    //color: 0x11eaff,
-
+    size: 3,
+    // 頂点カラーの使用宣言
     vertexColors: true,
 });
 // 物体を作成
@@ -139,22 +133,15 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 
     Gslider = value;
 
-    // data[1].red = 28 + Gslider * 15;
-    // data[2].red = 33 + Gslider * 15;
-    // data[3].red = 34 + Gslider * 15;
-    // data[4].red = 34 + Gslider * 15;
-    // data[5].red = 34 + Gslider * 15;
-    // data[6].red = 34 + Gslider * 15;
-
     for (let i = 0; i < data.length; i++) {
-        if (Gslider*2 < V_th) {
+        if (Gslider * 2 < V_th) {
             data[i].red = 0;
         }
         else if (data[i].x < (Gslider * 2 - V_th)) {
-            data[i].red = (Gslider * 2 - V_th) * data[i].x - ((data[i].x) ** 2)/2;
+            data[i].red = (Gslider * 2 - V_th) * data[i].x - ((data[i].x) ** 2) / 2;
         }
-        else if(data[i].x >= (Gslider * 2 - V_th)){
-            data[i].red = ((Gslider * 2 - V_th) ** 2)/2;
+        else if (data[i].x >= (Gslider * 2 - V_th)) {
+            data[i].red = ((Gslider * 2 - V_th) ** 2) / 2;
         }
     };
     console.log("data");
@@ -162,8 +149,8 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
 
     dataBVG[0].x = Gslider * 2;
     dataBVG[1].x = Gslider * 2;
-    let vgnum = parseFloat(Gslider*20);
-    let vdnum = parseFloat(Dslider*20);
+    let vgnum = parseFloat(Gslider * 20);
+    let vdnum = parseFloat(Dslider * 20);
     dataBVG[1].red = datavg[vgnum].red;
     dataBVD[1].red = data[vdnum].red;
 
@@ -171,8 +158,11 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
     idvgChart.update();
 
     vertices.length = 0; //点群を初期化
+    Cvert.length = 0; //頂点カラーを初期化
+
     addPoints();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(Cvert, 3));
     render();
 
 });
@@ -180,39 +170,35 @@ gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
 
     Dslider = value;
 
-    // datavg[3].red = 18 + Dslider * 8;
-    // datavg[4].red = 32 + Dslider * 20;
-    // datavg[5].red = 56 + Dslider * 30;
-    // datavg[6].red = 80 + Dslider * 70;
-
     for (let i = 0; i < datavg.length; i++) {
         if (datavg[i].x < V_th) {
             datavg[i].red = 0;
         }
         else if (Dslider * 2 < (datavg[i].x - V_th)) {
-            datavg[i].red = (datavg[i].x - V_th) * Dslider * 2 - ((Dslider * 2) ** 2)/2;
+            datavg[i].red = (datavg[i].x - V_th) * Dslider * 2 - ((Dslider * 2) ** 2) / 2;
         }
-        else if (Dslider * 2 >= (datavg[i].x - V_th)){
-            datavg[i].red = ((datavg[i].x - V_th) ** 2)/2;
+        else if (Dslider * 2 >= (datavg[i].x - V_th)) {
+            datavg[i].red = ((datavg[i].x - V_th) ** 2) / 2;
         }
     };
 
     dataBVD[0].x = Dslider * 2;
     dataBVD[1].x = Dslider * 2;
-    let vgnum = parseFloat(Gslider*20);
-    let vdnum = parseFloat(Dslider*20);
-    // console.log(idid);
-    // console.log(data[idid].red);
+    let vgnum = parseFloat(Gslider * 20);
+    let vdnum = parseFloat(Dslider * 20);
+
     dataBVG[1].red = datavg[vgnum].red;
     dataBVD[1].red = data[vdnum].red;
-    
 
     idvgChart.update();
     idvdChart.update();
 
     vertices.length = 0; //点群を初期化
+    Cvert.length = 0; //頂点カラーを初期化
     addPoints();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(Cvert, 3));
+
     render();
 
 });
@@ -227,8 +213,7 @@ gui.open();
 function init() {
     /*----------初期化処理----------*/
     console.log("init");
-    //console.log("out ver02");
-    //console.log(ver02);
+
 }
 
 function getCsv() {
@@ -273,31 +258,32 @@ function convertCsvToArray(str) {
 
 function addPoints() {
     console.log("addPoints");
+    console.log(ver02.length);
 
     //線形補間
     for (let i = 0; i < ver02.length; i = i + 3) {
-        const x = parseFloat(ver00[i]) * 20;
+        const x = i > 107 * 3 * 56 ? parseFloat(ver00[i]) * 2 + 300 : parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
         const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 45));
-        //const z = parseFloat(ver00[i + 2]*20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 40));
-        //const z = parseFloat(ver00[i + 2] - (ver00[i + 2] - ver20[i + 2]) * Gslider) * 20;
-        //const z = parseFloat(ver20[i + 2]) * 20;
-
 
         vertices.push(x, z, y);
+
+        if (i < 107 * 3 * 11) {
+            Cvert.push(0.8, 0.8, 0.8);
+        }
+        else if (i >= 107 * 3 * 11 && i < 107 * 3 * 31) {
+            Cvert.push(1, 1, 1);
+        } else {
+            Cvert.push(0, 1.5 - z / 10, (z+0.5)/ 10);
+        }
     }
-    console.log(vertices);
 }
-
-// function calcId() {
-
-// }
 
 //レンダリング時に実行したい処理をここに書く
 function render() {
-    //idvdChart.update();
 
     mesh.geometry.attributes.position.needsUpdate = true;
+    mesh.geometry.attributes.color.needsUpdate = true;
     renderer.render(scene, camera);
 
 }
@@ -321,22 +307,23 @@ const promise = new Promise((resolve, reject) => {
     init();
     getCsv();
 
-
-    console.log(vertices);
+    //console.log("inininit");
+    //console.log(vertices);
     setTimeout(() => {
         resolve();
-    }, 500);
+    }, 1000);
 
 })
     .then(() => {
-        //Dslider = 0.0; //sliderの初期値（これがないとページ更新時に点群が表示されない）
-        //Gslider = 0.0;
+
         addPoints();
         console.log(vertices);
 
         // // 形状データを作成
         // const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(Cvert, 3));
+
 
         // // マテリアルを作成
         // const material = new THREE.PointsMaterial({
