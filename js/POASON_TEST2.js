@@ -1,28 +1,37 @@
 import * as THREE from 'three';
+import { FontLoader } from '../node_modules/three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from '../node_modules/three/examples/jsm/geometries/TextGeometry.js';
 import { GUI } from '../node_modules/three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
-import { Color } from 'three';
 //import { TransformControls } from '../node_modules/three/examples/jsm/controls/TransformControls.js';
 
 
 /*--------------------変数の宣言--------------------*/
 
+// 文字
+let textMetal = "Metal";
+let textOxide = "Oxide";
+let textSilicon = "Silicon";
+const font = "gothic";
+const size = 25;
+const height = 5;
+const curveSegments = 2;
+const bevelThickness = 2;
+const bevelSize = 1.5;
+const bevelEnabled = true;
 
-
-// const loadBookNum = "02";
-
+// 頂点バッファ(頂点座標の格納)
 let ver00 = [];
 let ver02 = [];
 let ver20 = [];
 
-
 //各軸の頂点数
 const N = 6803;
 
-//刻み幅
+//刻み幅(使ってない)
 const dt = Math.PI / 8;
 
-//計算式の最大値
+//計算式の最大値(使ってない)
 const MAX = 400;
 
 
@@ -50,10 +59,10 @@ const container = document.getElementById('container');
 
 //シーン
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x555555);
+scene.background = new THREE.Color(0x000000);
 //カメラ
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
-camera.position.set(0, 500, 1000);
+camera.position.set(0, 250, 375);
 scene.add(camera);
 //環境光
 scene.add(new THREE.AmbientLight(0xf0f0f0));
@@ -102,6 +111,66 @@ helper.material.transparent = true;
 scene.add(helper);
 
 
+//ここから3Dテキストの作成
+const loader = new FontLoader();
+
+loader.load('../node_modules/three/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+    const geoMetalText = new TextGeometry(textMetal, {
+        font: font,
+        size: size,
+        height: height,
+        curveSegments: curveSegments,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled
+
+    });
+    const geoOxideText = new TextGeometry(textOxide, {
+        font: font,
+        size: size,
+        height: height,
+        curveSegments: curveSegments,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled
+
+    });
+    const geoSiliconText = new TextGeometry(textSilicon, {
+        font: font,
+        size: size,
+        height: height,
+        curveSegments: curveSegments,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled
+
+    });
+    const matMetalText = new THREE.MeshMatcapMaterial({color:0xd0d0d0});
+    const matOxideText = new THREE.MeshMatcapMaterial({color:0xffffff});
+    const matSiliconText = new THREE.MeshMatcapMaterial({color:0x60f0ff});
+    const meshMetalText = new THREE.Mesh(geoMetalText, matMetalText);
+    const meshOxideText = new THREE.Mesh(geoOxideText, matOxideText);
+    const meshSiliconText = new THREE.Mesh(geoSiliconText, matSiliconText);
+    meshMetalText.position.set(-200,200,0);
+    meshOxideText.position.set(-85,200,0);
+    meshSiliconText.position.set(100,200,0);
+    scene.add(meshMetalText);
+    scene.add(meshOxideText);
+    scene.add(meshSiliconText);
+});
+
+
+
+
+
+
+
+
+
+// ここから3Dバンド図の作成
 // 形状データを作成
 const geometry = new THREE.BufferGeometry();
 // 材質データを作成
@@ -113,6 +182,7 @@ const material = new THREE.PointsMaterial({
 });
 // 物体を作成
 const mesh = new THREE.Points(geometry, material);
+mesh.position.z = -250;
 scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
 
 
@@ -121,36 +191,37 @@ scene.add(mesh); // シーンは任意の THREE.Scene インスタンス
 let Gslider = 0.0;
 let Dslider = 0.0;
 const params = {
-    gateValue: 0.0,
-    drainValue: 0.0,
+    GateVoltage: 0.0,
+    DrainVoltage: 0.0,
 };
 //GUIの設定
-const gui = new GUI();
+const gui = new GUI({
+    width: 400,
+});
+// gui.width = "800px";
 //onChange(event) => 値が変更されるたびにonChange内のeventが呼び出される。
 //gui.add（object , property , min , max ,`step`）
 //第五引数のstepはstep()で設定でき、可読性も高いので、step()で設定しています。
-gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
+gui.add(params, 'GateVoltage', 0, 2).step(0.1).onChange(function (value) {
 
     Gslider = value;
 
     for (let i = 0; i < data.length; i++) {
-        if (Gslider * 2 < V_th) {
+        if (Gslider < V_th) {
             data[i].red = 0;
         }
-        else if (data[i].x < (Gslider * 2 - V_th)) {
-            data[i].red = (Gslider * 2 - V_th) * data[i].x - ((data[i].x) ** 2) / 2;
+        else if (data[i].x < (Gslider - V_th)) {
+            data[i].red = (Gslider - V_th) * data[i].x - ((data[i].x) ** 2) / 2;
         }
-        else if (data[i].x >= (Gslider * 2 - V_th)) {
-            data[i].red = ((Gslider * 2 - V_th) ** 2) / 2;
+        else if (data[i].x >= (Gslider - V_th)) {
+            data[i].red = ((Gslider - V_th) ** 2) / 2;
         }
     };
-    console.log("data");
-    console.log(data);
 
-    dataBVG[0].x = Gslider * 2;
-    dataBVG[1].x = Gslider * 2;
-    let vgnum = parseFloat(Gslider * 20);
-    let vdnum = parseFloat(Dslider * 20);
+    dataBVG[0].x = Gslider;
+    dataBVG[1].x = Gslider;
+    let vgnum = parseFloat(Gslider * 10);
+    let vdnum = parseFloat(Dslider * 10);
     dataBVG[1].red = datavg[vgnum].red;
     dataBVD[1].red = data[vdnum].red;
 
@@ -166,7 +237,7 @@ gui.add(params, 'gateValue', 0, 1).step(0.05).onChange(function (value) {
     render();
 
 });
-gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
+gui.add(params, 'DrainVoltage', 0, 2).step(0.1).onChange(function (value) {
 
     Dslider = value;
 
@@ -174,18 +245,18 @@ gui.add(params, 'drainValue', 0, 1).step(0.05).onChange(function (value) {
         if (datavg[i].x < V_th) {
             datavg[i].red = 0;
         }
-        else if (Dslider * 2 < (datavg[i].x - V_th)) {
-            datavg[i].red = (datavg[i].x - V_th) * Dslider * 2 - ((Dslider * 2) ** 2) / 2;
+        else if (Dslider < (datavg[i].x - V_th)) {
+            datavg[i].red = (datavg[i].x - V_th) * Dslider - ((Dslider) ** 2) / 2;
         }
-        else if (Dslider * 2 >= (datavg[i].x - V_th)) {
+        else if (Dslider >= (datavg[i].x - V_th)) {
             datavg[i].red = ((datavg[i].x - V_th) ** 2) / 2;
         }
     };
 
-    dataBVD[0].x = Dslider * 2;
-    dataBVD[1].x = Dslider * 2;
-    let vgnum = parseFloat(Gslider * 20);
-    let vdnum = parseFloat(Dslider * 20);
+    dataBVD[0].x = Dslider;
+    dataBVD[1].x = Dslider;
+    let vgnum = parseFloat(Gslider * 10);
+    let vdnum = parseFloat(Dslider * 10);
 
     dataBVG[1].red = datavg[vgnum].red;
     dataBVD[1].red = data[vdnum].red;
@@ -257,24 +328,23 @@ function convertCsvToArray(str) {
 }
 
 function addPoints() {
-    console.log("addPoints");
-    console.log(ver02.length);
+    //console.log("addPoints");
 
     //線形補間
     for (let i = 0; i < ver02.length; i = i + 3) {
-        const x = i > 107 * 3 * 56 ? parseFloat(ver00[i]) * 2 + 300 : parseFloat(ver00[i]) * 20;
+        const x = i >= 107 * 3 * 56 ? parseFloat(ver00[i]) * 4 + 250 : parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
-        const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 20 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 45));
+        const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 10 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 22));
 
         vertices.push(x, z, y);
 
         if (i < 107 * 3 * 11) {
-            Cvert.push(0.8, 0.8, 0.8);
+            Cvert.push(155 / 255, 168 / 255, 170 / 255);
         }
         else if (i >= 107 * 3 * 11 && i < 107 * 3 * 31) {
             Cvert.push(1, 1, 1);
         } else {
-            Cvert.push(0, 1.5 - z / 10, (z+0.5)/ 10);
+            Cvert.push(0, 1.5 - z / 10, (z + 0.5) / 10);
         }
     }
 }
@@ -284,6 +354,7 @@ function render() {
 
     mesh.geometry.attributes.position.needsUpdate = true;
     mesh.geometry.attributes.color.needsUpdate = true;
+
     renderer.render(scene, camera);
 
 }
@@ -307,8 +378,6 @@ const promise = new Promise((resolve, reject) => {
     init();
     getCsv();
 
-    //console.log("inininit");
-    //console.log(vertices);
     setTimeout(() => {
         resolve();
     }, 1000);
@@ -317,7 +386,7 @@ const promise = new Promise((resolve, reject) => {
     .then(() => {
 
         addPoints();
-        console.log(vertices);
+        // console.log(vertices);
 
         // // 形状データを作成
         // const geometry = new THREE.BufferGeometry();
@@ -376,15 +445,6 @@ vgx.width = 1;
 vgx.height = 1
 
 
-// var data = [
-//     { x: '0', red: 20 },
-//     { x: 'Th', red: 28 },
-//     { x: 'Over', red: 33 },
-//     { x: ' ', red: 34 },
-//     { x: '  ', red: 34 },
-//     { x: '   ', red: 34 },
-//     { x: 'Dorain Vol', red: 34 },
-// ];
 var data = [
     { x: 0.0, red: 0 },
     { x: 0.1, red: 0 },
@@ -409,13 +469,6 @@ var data = [
     { x: 2.0, red: 0 },
 ];
 var datavg = [
-    // { x: 0, red: 0 },
-    // { x: 1, red: 4 },
-    // { x: 2, red: 10 },
-    // { x: 3, red: 18 },
-    // { x: 4, red: 32 },
-    // { x: 5, red: 56 },
-    // { x: 6, red: 80 },
     { x: 0.0, red: 0 },
     { x: 0.1, red: 0 },
     { x: 0.2, red: 0 },
@@ -562,6 +615,4 @@ var idvgChart = new Chart(vgx, {
 //ctx.parentNode.style.width = '20%';
 //ctx.parentNode.style.height = '40vh';
 //vgx.parentNode.style.width = '20%';
-vgx.parentNode.style.width = '20%';
-//vgx.parentNode.style.height = '40vh';
-//vgx.parentNode.style.height = '40vh';
+vgx.parentNode.style.width = '20vw';
