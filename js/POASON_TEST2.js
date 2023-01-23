@@ -11,7 +11,10 @@ import { OrbitControls } from '../node_modules/three/examples/jsm/controls/Orbit
 // 文字
 let textMetal = "Metal";
 let textOxide = "Oxide";
-let textSilicon = "Silicon";
+let textSilicon = "Semicond.";
+let textGate = "G a t e";
+let textSource = "S o u r c e";
+let textDrain = "D r a i n";
 const font = "gothic";
 const size = 25;
 const height = 5;
@@ -148,18 +151,65 @@ loader.load('../node_modules/three/examples/fonts/helvetiker_regular.typeface.js
         bevelEnabled: bevelEnabled
 
     });
+    const geoGateText = new TextGeometry(textGate, {
+        font: font,
+        size: size,
+        height: height-3,
+        curveSegments: curveSegments,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled
+
+    });
+    const geoSourceText = new TextGeometry(textSource, {
+        font: font,
+        size: size,
+        height: height-3,
+        curveSegments: curveSegments,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled
+
+    });
+    const geoDrainText = new TextGeometry(textDrain, {
+        font: font,
+        size: size,
+        height: height-3,
+        curveSegments: curveSegments,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled
+
+    });
     const matMetalText = new THREE.MeshMatcapMaterial({ color: 0xd0d0d0 });
     const matOxideText = new THREE.MeshMatcapMaterial({ color: 0xffffff });
     const matSiliconText = new THREE.MeshMatcapMaterial({ color: 0x60f0ff });
+    const matGSDText = new THREE.MeshBasicMaterial({ color: 0xfaffff });
     const meshMetalText = new THREE.Mesh(geoMetalText, matMetalText);
     const meshOxideText = new THREE.Mesh(geoOxideText, matOxideText);
     const meshSiliconText = new THREE.Mesh(geoSiliconText, matSiliconText);
+    const meshGateText = new THREE.Mesh(geoGateText, matGSDText);
+    const meshSourceText = new THREE.Mesh(geoSourceText, matGSDText);
+    const meshDrainText = new THREE.Mesh(geoDrainText, matGSDText);
+
     meshMetalText.position.set(-200, 200, 0);
     meshOxideText.position.set(-85, 200, 0);
     meshSiliconText.position.set(100, 200, 0);
+    meshGateText.position.set(-150, 0, 50);
+    meshSourceText.position.set(50, 0, -110);
+    meshDrainText.position.set(50, 0, 250);
+    meshGateText.rotation.set(-3.14/2, 0, 3.14/2);
+    meshSourceText.rotation.set(-3.14/2, 0, 3.14/2);
+    meshDrainText.rotation.set(-3.14/2, 0, 3.14/2);
     scene.add(meshMetalText);
     scene.add(meshOxideText);
     scene.add(meshSiliconText);
+    scene.add(meshGateText);
+    scene.add(meshSourceText);
+    scene.add(meshDrainText);
 });
 
 
@@ -337,7 +387,7 @@ function addPoints() {
         const x = i >= 107 * 3 * 56 ? parseFloat(ver00[i]) * 4 + 250 : parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
         // const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 10 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 22));
-        const z = parseFloat(ver00[i + 2] * 24 * 5 - ((ver00[i + 2] - ver02[i + 2])*5 * Dslider * 10 + (ver00[i + 2]*5 - ver20[i + 2]) * Gslider * 20));
+        const z = parseFloat(ver00[i + 2] * 24 * 5 - ((ver00[i + 2] - ver02[i + 2]) * 5 * Dslider * 10 + (ver00[i + 2] * 5 - ver20[i + 2]) * Gslider * 20));
 
         vertices.push(x, z, y);
 
@@ -347,7 +397,7 @@ function addPoints() {
         else if (i >= 107 * 3 * 11 && i < 107 * 3 * 31) {
             Cvert.push(1, 1, 1);
         } else {
-            Cvert.push(0, 1.5 - z / 10, (z -2) / 10);
+            Cvert.push(0, 1.5 - z / 10, (z - 2) / 10);
         }
     }
 }
@@ -429,16 +479,20 @@ const promise = new Promise((resolve, reject) => {
 var chartCanvas;
 var idvgCanvas;
 
-chartCanvas = document.createElement("canvas");
-chartCanvas.id = 'chartcanvas';
-
 idvgCanvas = document.createElement("canvas");
 idvgCanvas.id = 'idvgcanvas';
 
+chartCanvas = document.createElement("canvas");
+chartCanvas.id = 'chartcanvas';
+
+
+
 var cbox = document.getElementById('container');
+cbox.appendChild(idvgCanvas);
+
 cbox.appendChild(chartCanvas);
 //var idvgbox = document.getElementById('container');
-cbox.appendChild(idvgCanvas);
+
 
 var ctx = document.querySelector("#chartcanvas");
 var vgx = document.querySelector("#idvgcanvas");
@@ -504,72 +558,6 @@ var dataBVG = [
 ];
 
 
-var idvdChart = new Chart(ctx, {
-    // type: 'line',
-    type: 'scatter',
-    data: {
-        //labels: [0, 1, 2, 3, 4, 5, 6],
-        datasets: [
-            {
-                label: 'Red',
-                borderColor: '#aaa',
-
-                data: data,
-                parsing: { yAxisKey: 'red' },
-                showLine: true,
-                tension: 0.3,
-                pointRadius: 2,
-            },
-            {
-                label: 'blue',
-                borderColor: '#0f0',
-                data: dataBVD,
-                parsing: { yAxisKey: 'red' },
-                showLine: true,
-                tension: 0.3,
-                pointRadius: 8,
-            }
-        ],
-    },
-    options: {
-        
-
-        animation: false,
-        maintainAspectRatio: true,
-        scales: {
-            x: {
-                min: 0,
-                max: 2,
-                ticks: {
-                    stepSize: 0.05 * 6,
-                    // maxTicksLimit: 100,
-                },
-            },
-            y: {
-                min: 0,
-                max: 1.5,
-                ticks: {
-                    stepSize: 5,
-                    //display: false,
-                },
-            },
-        },
-        plugins: {
-            title: {
-                display: true,
-                position: "top",
-                // fontColor: "white",
-                fontStyle: "bold",
-                text: "Id-Vd Graph",
-            },
-            legend: {
-                display: false,
-            }
-        },
-    },
-});
-ctx.parentNode.style.width = '20%';
-
 var idvgChart = new Chart(vgx, {
     type: 'scatter',
     data: {
@@ -577,7 +565,7 @@ var idvgChart = new Chart(vgx, {
         datasets: [
             {
                 label: 'Red',
-                borderColor: '#aaa',
+                borderColor: '#fff',
                 data: datavg,
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
@@ -606,24 +594,117 @@ var idvgChart = new Chart(vgx, {
                     stepSize: 0.05 * 6,
                     // maxTicksLimit: 100,
                 },
+                title: {
+                    display: true,
+                    fontColor: "white",
+                    text: 'Gate Voltage[V]'
+                },
             },
             y: {
                 min: 0,
                 max: 1.5,
                 ticks: {
-                    stepSize: 5,
+                    stepSize: 0.5,
                     //display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Drain Current[A]'
                 },
             },
         },
         plugins: {
+            title: {
+                display: true,
+                position: "top",
+                fontColor: "white",
+                fontStyle: "bold",
+                text: "Id-Vg Graph",
+            },
             legend: {
                 display: false,
+            },
+        },
+    },
+});
+
+var idvdChart = new Chart(ctx, {
+    // type: 'line',
+    type: 'scatter',
+    data: {
+        //labels: [0, 1, 2, 3, 4, 5, 6],
+        datasets: [
+            {
+                label: 'Red',
+                borderColor: '#fff',
+
+                data: data,
+                parsing: { yAxisKey: 'red' },
+                showLine: true,
+                tension: 0.3,
+                pointRadius: 2,
+            },
+            {
+                label: 'blue',
+                borderColor: '#0f0',
+                data: dataBVD,
+                parsing: { yAxisKey: 'red' },
+                showLine: true,
+                tension: 0.3,
+                pointRadius: 8,
             }
+        ],
+    },
+    options: {
+
+
+        animation: false,
+        maintainAspectRatio: true,
+        scales: {
+            x: {
+                min: 0,
+                max: 2,
+                ticks: {
+                    stepSize: 0.05 * 6,
+                    // maxTicksLimit: 100,
+                },
+                title: {
+                    display: true,
+                    text: 'Drain Voltage[V]'
+                },
+            },
+            y: {
+                min: 0,
+                max: 1.5,
+                ticks: {
+                    stepSize: 0.5,
+                    //display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Drain Current[A]'
+                },
+            },
+        },
+        plugins: {
+            title: {
+                display: true,
+                position: "top",
+                fontColor: "white",
+                fontStyle: "bold",
+                text: "Id-Vd Graph",
+            },
+            legend: {
+                display: false,
+            },
         },
     },
 });
 //ctx.parentNode.style.width = '20%';
+
+
+//ctx.parentNode.style.width = '20%';
 //ctx.parentNode.style.height = '40vh';
 //vgx.parentNode.style.width = '20%';
+//ctx.parentNode.style.width = '19vw';
 vgx.parentNode.style.width = '19vw';
