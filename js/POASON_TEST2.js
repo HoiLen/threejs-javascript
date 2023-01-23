@@ -148,15 +148,15 @@ loader.load('../node_modules/three/examples/fonts/helvetiker_regular.typeface.js
         bevelEnabled: bevelEnabled
 
     });
-    const matMetalText = new THREE.MeshMatcapMaterial({color:0xd0d0d0});
-    const matOxideText = new THREE.MeshMatcapMaterial({color:0xffffff});
-    const matSiliconText = new THREE.MeshMatcapMaterial({color:0x60f0ff});
+    const matMetalText = new THREE.MeshMatcapMaterial({ color: 0xd0d0d0 });
+    const matOxideText = new THREE.MeshMatcapMaterial({ color: 0xffffff });
+    const matSiliconText = new THREE.MeshMatcapMaterial({ color: 0x60f0ff });
     const meshMetalText = new THREE.Mesh(geoMetalText, matMetalText);
     const meshOxideText = new THREE.Mesh(geoOxideText, matOxideText);
     const meshSiliconText = new THREE.Mesh(geoSiliconText, matSiliconText);
-    meshMetalText.position.set(-200,200,0);
-    meshOxideText.position.set(-85,200,0);
-    meshSiliconText.position.set(100,200,0);
+    meshMetalText.position.set(-200, 200, 0);
+    meshOxideText.position.set(-85, 200, 0);
+    meshSiliconText.position.set(100, 200, 0);
     scene.add(meshMetalText);
     scene.add(meshOxideText);
     scene.add(meshSiliconText);
@@ -293,14 +293,16 @@ function getCsv() {
     let req02 = new XMLHttpRequest();
     let req20 = new XMLHttpRequest();
 
-    req00.open("get", "../data/poten2d_0V-0V.csv", true);
+    // req00.open("get", "../data/poten2d_0V-0V.csv", true);
+    req00.open("get", "../data/poten2d_0v0v.csv", true);
     req00.send(null);
     req00.onload = function () {
         console.log("onload00");
         ver00 = convertCsvToArray(req00.responseText);
     }
 
-    req02.open("get", "../data/poten2d_0V-2V.csv", true);
+    // req02.open("get", "../data/poten2d_0V-2V.csv", true);
+    req02.open("get", "../data/poten2d_0v2v.csv", true);
     req02.send(null);
     req02.onload = function () {
         console.log("onload02");
@@ -334,7 +336,8 @@ function addPoints() {
     for (let i = 0; i < ver02.length; i = i + 3) {
         const x = i >= 107 * 3 * 56 ? parseFloat(ver00[i]) * 4 + 250 : parseFloat(ver00[i]) * 20;
         const y = parseFloat(ver00[i + 1]) * 5;
-        const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 10 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 22));
+        // const z = parseFloat(ver00[i + 2] * 20 - ((ver00[i + 2] - ver02[i + 2]) * Dslider * 10 + (ver00[i + 2] - ver20[i + 2]) * Gslider * 22));
+        const z = parseFloat(ver00[i + 2] * 24 * 5 - ((ver00[i + 2] - ver02[i + 2])*5 * Dslider * 10 + (ver00[i + 2]*5 - ver20[i + 2]) * Gslider * 20));
 
         vertices.push(x, z, y);
 
@@ -344,7 +347,7 @@ function addPoints() {
         else if (i >= 107 * 3 * 11 && i < 107 * 3 * 31) {
             Cvert.push(1, 1, 1);
         } else {
-            Cvert.push(0, 1.5 - z / 10, (z + 0.5) / 10);
+            Cvert.push(0, 1.5 - z / 10, (z -2) / 10);
         }
     }
 }
@@ -529,6 +532,7 @@ var idvdChart = new Chart(ctx, {
         ],
     },
     options: {
+        
 
         animation: false,
         maintainAspectRatio: true,
@@ -551,6 +555,13 @@ var idvdChart = new Chart(ctx, {
             },
         },
         plugins: {
+            title: {
+                display: true,
+                position: "top",
+                // fontColor: "white",
+                fontStyle: "bold",
+                text: "Id-Vd Graph",
+            },
             legend: {
                 display: false,
             }
@@ -615,4 +626,4 @@ var idvgChart = new Chart(vgx, {
 //ctx.parentNode.style.width = '20%';
 //ctx.parentNode.style.height = '40vh';
 //vgx.parentNode.style.width = '20%';
-vgx.parentNode.style.width = '20vw';
+vgx.parentNode.style.width = '19vw';

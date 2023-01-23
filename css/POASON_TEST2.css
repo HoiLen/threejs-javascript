@@ -8,6 +8,10 @@
     position: absolute;
 }
 
+#chartcanvas {
+    margin-top: 10px;
+}
+
 #idvgcanvas {
-    margin-top: 300px;
+    margin-top: 350px;
 }
