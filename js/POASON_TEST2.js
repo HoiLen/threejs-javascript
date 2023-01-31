@@ -62,7 +62,8 @@ const container = document.getElementById('container');
 
 //シーン
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0xeeeeee);
+// scene.background = new THREE.Color(0x000000);
 //カメラ
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
 camera.position.set(0, 250, 375);
@@ -111,7 +112,7 @@ const helper = new THREE.GridHelper(2000, 100);
 helper.position.y = - 199;
 helper.material.opacity = 0.10;
 helper.material.transparent = true;
-scene.add(helper);
+//scene.add(helper);
 
 
 //ここから3Dテキストの作成
@@ -187,7 +188,8 @@ loader.load('../node_modules/three/examples/fonts/helvetiker_regular.typeface.js
     const matMetalText = new THREE.MeshMatcapMaterial({ color: 0xd0d0d0 });
     const matOxideText = new THREE.MeshMatcapMaterial({ color: 0xffffff });
     const matSiliconText = new THREE.MeshMatcapMaterial({ color: 0x60f0ff });
-    const matGSDText = new THREE.MeshBasicMaterial({ color: 0xfaffff });
+    // const matGSDText = new THREE.MeshBasicMaterial({ color: 0xfaffff });
+    const matGSDText = new THREE.MeshMatcapMaterial({ color: 0x888888 });
     const meshMetalText = new THREE.Mesh(geoMetalText, matMetalText);
     const meshOxideText = new THREE.Mesh(geoOxideText, matOxideText);
     const meshSiliconText = new THREE.Mesh(geoSiliconText, matSiliconText);
@@ -392,10 +394,12 @@ function addPoints() {
         vertices.push(x, z, y);
 
         if (i < 107 * 3 * 11) {
-            Cvert.push(155 / 255, 168 / 255, 170 / 255);
+            Cvert.push(80 / 255, 80 / 255, 80 / 255);
+            // Cvert.push(155 / 255, 168 / 255, 170 / 255);
         }
         else if (i >= 107 * 3 * 11 && i < 107 * 3 * 31) {
-            Cvert.push(1, 1, 1);
+            Cvert.push(255/255, 80/255, 80/255);
+            // Cvert.push(1, 1, 1);
         } else {
             Cvert.push(0, 1.5 - z / 10, (z - 2) / 10);
         }
@@ -439,7 +443,7 @@ const promise = new Promise((resolve, reject) => {
     .then(() => {
 
         addPoints();
-        // console.log(vertices);
+        //console.log(ver02.length);
 
         // // 形状データを作成
         // const geometry = new THREE.BufferGeometry();
@@ -565,7 +569,7 @@ var idvgChart = new Chart(vgx, {
         datasets: [
             {
                 label: 'Red',
-                borderColor: '#fff',
+                borderColor: '#000',
                 data: datavg,
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
@@ -574,7 +578,7 @@ var idvgChart = new Chart(vgx, {
             },
             {
                 label: 'blue',
-                borderColor: '#0f0',
+                borderColor: '#f00',
                 data: dataBVG,
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
@@ -636,7 +640,7 @@ var idvdChart = new Chart(ctx, {
         datasets: [
             {
                 label: 'Red',
-                borderColor: '#fff',
+                borderColor: '#000',
 
                 data: data,
                 parsing: { yAxisKey: 'red' },
@@ -646,7 +650,7 @@ var idvdChart = new Chart(ctx, {
             },
             {
                 label: 'blue',
-                borderColor: '#0f0',
+                borderColor: '#f00',
                 data: dataBVD,
                 parsing: { yAxisKey: 'red' },
                 showLine: true,
