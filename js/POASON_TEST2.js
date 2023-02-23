@@ -200,9 +200,9 @@ loader.load('../node_modules/three/examples/fonts/helvetiker_regular.typeface.js
     meshMetalText.position.set(-200, 200, 0);
     meshOxideText.position.set(-85, 200, 0);
     meshSiliconText.position.set(100, 200, 0);
-    meshGateText.position.set(-150, 0, 50);
-    meshSourceText.position.set(50, 0, -110);
-    meshDrainText.position.set(50, 0, 250);
+    meshGateText.position.set(-150, 10, 50);
+    meshSourceText.position.set(50, 10, -110);
+    meshDrainText.position.set(50, 10, 250);
     meshGateText.rotation.set(-3.14/2, 0, 3.14/2);
     meshSourceText.rotation.set(-3.14/2, 0, 3.14/2);
     meshDrainText.rotation.set(-3.14/2, 0, 3.14/2);
