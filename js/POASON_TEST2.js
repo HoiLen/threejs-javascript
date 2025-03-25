@@ -244,14 +244,20 @@ const params = {
 const gui = new GUI({
   width: 400,
 });
-// gui.width = "800px";
+
 //onChange(event) => 値が変更されるたびにonChange内のeventが呼び出される。
 //gui.add（object , property , min , max ,`step`）
+<<<<<<< HEAD
 //第五引数のstepはstep()で設定でき、可読性も高いので、step()で設定しています。
 gui
   .add(params, 'GateVoltage', 0, 2)
   .step(0.1)
   .onChange(function (value) {
+=======
+//第五引数のstepは.step()で設定でき、可読性も高いので、.step()で設定しています。
+gui.add(params, 'GateVoltage', 0, 2).step(0.1).onChange(function (value) {
+
+>>>>>>> 2a363372ef060c8b153bac307a5a274a86d0926e
     Gslider = value;
 
     for (let i = 0; i < data.length; i++) {
