@@ -48,7 +48,7 @@ poten2d_[X]V-[Y]V.csv
 POASON_TEST2.htmlがシミュレータのファイルです．それ以外はすべてシミュレータの制作過程で生まれた勉強用のファイルです．
 
 ## js
-JavaScriptのファイルで，htmlのファイル名と対応したファイル名になっています．なので，POASON_TEST2.jsがシミュレータのプログラムです．
+JavaScriptのファイルは，htmlのファイル名と対応したファイル名になっています．なので，POASON_TEST2.jsがシミュレータのプログラムです．
 
 ## modelsとnode_modules
 ``npm``コマンドでインポートしたJavaScriptのライブラリたちです．基本的にはThree.jsをインポートしていますが，ほかのライブラリも``index.html``からCDNでインポートしています．
