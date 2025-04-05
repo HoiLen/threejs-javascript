@@ -14,6 +14,8 @@ MOSFET は、CPUやメモリなどのPCパーツに使われている半導体�
 アプリケーション画面中央には点群が写っており、これは MOSFET のエネルギーバンドを表しています。
 このバンドの上を電子が転がることで電流が流れるイメージです。
 
+!['動画']('https://youtu.be/KAX_ufQ7vpY?si=9fcsf58j114fR6hq')
+
 ## 技術について
 
 HTML / CSS / JavaScript で開発
